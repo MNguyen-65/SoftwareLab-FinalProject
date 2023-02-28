@@ -1,7 +1,18 @@
 from pymongo import MongoClient
 
+MONGODB_SERVER = "mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority"
+
+'''
+Structure of Hardware Set entry so far:
+HardwareSet = {
+    "Name": hwSetName,
+    "Capacity": initialCapacity,
+    "Availability": initialCapacity
+}
+'''
+
 def addHardwareSet(hwSetName, initCapacity):
-    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+    client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     hwsets = db.HardwareSets
     
@@ -16,7 +27,7 @@ def addHardwareSet(hwSetName, initCapacity):
 
 # Might have to be private
 def queryHardwareSet(hwSetName):
-    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+    client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     hwsets = db.HardwareSets
 

@@ -1,7 +1,19 @@
 from pymongo import MongoClient
 
+MONGODB_SERVER = "mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority"
+
+'''
+Structure of Project entry so far:
+Project = {
+    "Name": projectName,
+    "ProjectID": projectID,
+    "Description": description
+    "HardwareSets": [HW1_ID, HW2_ID, ...]
+}
+'''
+
 def addProject(projectName, projectID, description):
-    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+    client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
     # Should check if projectName & projectID are unique
@@ -18,12 +30,12 @@ def addProject(projectName, projectID, description):
 
 # Might have to be private
 # Can either query based on project name or ID
-def queryProject(projectName):
-    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+def queryProject(projectID):
+    client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
 
-    query = {"Name": projectName}
+    query = {"ProjectID": projectID}
     doc = projects.find_one(query)
     client.close()
 
