@@ -36,3 +36,31 @@ def queryHardwareSet(hwSetName):
     client.close()
 
     return doc
+
+def updateAvailability(hwSetName, newAvailability):
+    client = MongoClient(MONGODB_SERVER)
+    db = client.HardwareCheckout
+    hwsets = db.HardwareSets
+
+    filter = {"Name": hwSetName}
+    newValue = {"$set": {"Availability": newAvailability}}
+
+    hwsets.update_one(filter, newValue)
+    client.close()
+
+def checkOut(hwSetName):
+    return
+
+def checkIn(hwSetName):
+    return
+
+def requestSpace(hwSetName, amount):
+    hwset = queryHardwareSet(hwSetName)
+    avail = int(hwset['Availability'])
+    allocated = min(avail, amount)
+    avail -= allocated
+
+    # Change database entry
+    updateAvailability(hwSetName, avail)
+
+    return allocated

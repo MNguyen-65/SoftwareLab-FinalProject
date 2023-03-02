@@ -16,17 +16,21 @@ def addProject(projectName, projectID, description):
     client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
-    # Should check if projectName & projectID are unique
+    success = False
     
     # Keep track of HW sets for this project
-    doc = {
-        "Name": projectName,
-        "ProjectID": projectID,
-        "Description": description
-    }
+    if projects.find({"Name": projectName, "ProjectID": projectID}).count() == 0:
+        doc = {
+            "Name": projectName,
+            "ProjectID": projectID,
+            "Description": description
+        }
+        projects.insert_one(doc)
+        success = True
 
-    projects.insert_one(doc)
     client.close()
+
+    return success
 
 # Might have to be private
 # Can either query based on project name or ID
