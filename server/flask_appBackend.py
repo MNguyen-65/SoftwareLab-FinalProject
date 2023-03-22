@@ -50,6 +50,39 @@ def add_user():
     return jsonify({'success': True, 'message': 'User added successfully.'})
 
 '''
+Structure of Project entry so far:
+Project = {
+    "Name": projectName,
+    "ProjectID": projectID,
+    "Description": description
+    "HardwareSets": [HW1_ID, HW2_ID, ...]
+    # Should probably be a map with HWSetName and amount used by this project
+}
+'''
+@app.route('/add_project', methods=['POST'])
+def add_project():
+    projectName = request.json.get('Name')
+    projectID = request.json.get('ProjectID')
+    description = request.json.get('Description')
+
+    db = mongo.HardwareCheckout
+    projects = db.Projects
+    success = False
+    
+    # Keep track of HW sets for this project
+    if projects.find({"Name": projectName, "ProjectID": projectID}).count() == 0:
+        doc = {
+            "Name": projectName,
+            "ProjectID": projectID,
+            "Description": description
+        }
+        projects.insert_one(doc)
+        return jsonify({'success': True, 'message': 'Project added successfully.'})
+
+    return jsonify({'success': False, 'message': 'Project already exists.'})
+
+
+'''
 Structure of Hardware Set entry so far:
 HardwareSet = {
     "Name": hwSetName,
@@ -58,12 +91,26 @@ HardwareSet = {
 }
 '''
 
+@app.route('/add_project', methods=['POST'])
+def add_hardware_set():
+    hwSetName = request.json.get('Name')
+    initCapacity = request.json.get('initCapacity')
 
+    db = mongo.HardwareCheckout
+    hwsets = db.HardwareSets
+    
+    doc = {
+        "Name": hwSetName,
+        "Capacity": str(initCapacity),
+        "Availability": str(initCapacity)
+    }
+
+    hwsets.insert_one(doc)
 
 # Function tries to create a user with their provided Username and Password
 # Returns json specfiying if the user creation was successful or not
 @app.route('/check_in', methods=['POST'])
-def checkIn():
+def check_in():
     username = request.json.get('Username')
     hardwareItem = request.json.get('HardwareItem')
     quantity = request.json.get('Quantity')
@@ -127,9 +174,9 @@ def check_out():
     mongo.db.inventory.update_one({'_id': item['_id']}, {'$set': {'quantity': item['quantity']}})
 
     # Update the user's data
-    user['Items'][item_name] -= quantity
-    if user['Items'][item_name] <= 0:
-        del user['Items'][item_name]
+    user['Items'][hardwareItem] -= quantity
+
+    # mongo.HardwareCheckout.HardwareSets refers to the HardwareSets collection in the mongoDB
     mongo.HardwareCheckout.HardwareSets.update_one({'_id': item['_id']}, {'$set': {'Available': item['Available']}})
     mongo.HardwareCheckout.Users.update_one({'_id': user['_id']}, {'$set': {'Items': user['Items']}})
 
