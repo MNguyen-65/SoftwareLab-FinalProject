@@ -1,51 +1,63 @@
 from flask import Flask, request, jsonify
-from flask_pymongo import PyMongo
+# from flask_pymongo import PyMongo
+from pymongo import MongoClient
+
 from bson.objectid import ObjectId
 
 app = Flask(__name__)
 app.config['MONGO_URI'] ="mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority"
-mongo = PyMongo(app)
+
+# client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
 
 '''
 Structure of User entry so far:
 User = {
-    "Username": username,
+    "username": username,
     "UserID": userid,
     "Password": password,
     "Items": {item1:qty1, item2:qty2, ....}
 }
 '''
-
-# Function tries to login a user with their provided Username and Password
+# Function tries to login a user with their provided username and Password
 # Returns json specfiying if the user login attempt was successful or not
 @app.route('/login', methods=['POST'])
 def login():
-    username = request.json.get('Username') # username, password are taken in from the webpage html
-    password = request.json.get('Password')
+    print("Attempting login")
 
-    user = mongo.HardwareCheckout.Users.find_one({'Username': username})    # access the hardware checkout database -> users collection
+    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
 
+    username = request.json.get('username') # username, password are taken in from the webpage html
+    password = request.json.get('password')
+
+    print('debug 32')
+    user = client.HardwareCheckout.People.find_one({'username': username})    # access the hardware checkout database -> users collection
+    client.close()
     if user and user['Password'] == password:
         return jsonify({'success': True, 'message': 'Login successful!'})
     else:
         return jsonify({'success': False, 'message': 'Invalid username or password.'})
 
 
-# Function tries to create a user with their provided Username and Password
+# Function tries to create a user with their provided username and Password
 # Returns json specfiying if the user creation was successful or not
 @app.route('/add_user', methods=['POST'])
 def add_user():
-    username = request.json.get('Username')
+    print(f"Attempting AddUser {request.json}")
+    username = request.json.get('username')
     password = request.json.get('Password')
 
+    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+
     # Check if the user already exists in the database
-    existing_user = mongo.HardwareCheckout.Users.find_one({'Username': username})
+    # existing_user = mongo.HardwareCheckout.Users.find_one({'username': username})
+    existing_user = client.HardwareCheckout.People.find_one({'username': username})
     if existing_user:
         return jsonify({'success': False, 'message': 'User already exists.'})
 
     # If the user doesn't exist already, add them to the database
-    new_user = {'Username': username, 'Password': password}
-    result = mongo.HardwareCheckout.Users.insert_one(new_user)
+    new_user = {'username': username, 'Password': password}
+    result = client.HardwareCheckout.People.insert_one(new_user)
+    client.close()
 
     return jsonify({'success': True, 'message': 'User added successfully.'})
 
@@ -91,7 +103,7 @@ HardwareSet = {
 }
 '''
 
-@app.route('/add_project', methods=['POST'])
+@app.route('/add_hardware', methods=['POST'])
 def add_hardware_set():
     hwSetName = request.json.get('Name')
     initCapacity = request.json.get('initCapacity')
@@ -107,18 +119,18 @@ def add_hardware_set():
 
     hwsets.insert_one(doc)
 
-# Function tries to create a user with their provided Username and Password
+# Function tries to create a user with their provided username and Password
 # Returns json specfiying if the user creation was successful or not
 @app.route('/check_in', methods=['POST'])
 def check_in():
-    username = request.json.get('Username')
+    username = request.json.get('username')
     hardwareItem = request.json.get('HardwareItem')
     quantity = request.json.get('Quantity')
     
     # Check if the user exists in the database
-    user = mongo.HardwareCheckout.Users.find_one({'Username': username})
+    user = mongo.HardwareCheckout.Users.find_one({'username': username})
     if not user:
-        return jsonify({'success': False, 'message': 'Username invalid. Unable to check in item'})
+        return jsonify({'success': False, 'message': 'username invalid. Unable to check in item'})
 
     # Update the inventory of the checked in item
     item = mongo.HardwareCheckout.HardwareSets.find_one({'Name': hardwareItem})
@@ -144,14 +156,14 @@ def check_in():
 
 @app.route('/check_out', methods=['POST'])
 def check_out():
-    username = request.json.get('Username')
+    username = request.json.get('username')
     hardwareItem = request.json.get('HardwareItem')
     quantity = request.json.get('Quantity')
 
     # Check if the user exists in the database
-    user = mongo.HardwareCheckout.Users.find_one({'Username': username})
+    user = mongo.HardwareCheckout.Users.find_one({'username': username})
     if not user:
-        return jsonify({'success': False, 'message': 'Username invalid. Unable to check in item'})
+        return jsonify({'success': False, 'message': 'username invalid. Unable to check in item'})
 
     # Check if the item exists in the inventory
     item = mongo.HardwareCheckout.HardwareSets.find_one({'Name': hardwareItem})
@@ -183,4 +195,4 @@ def check_out():
     return jsonify({'success': True, 'message': 'Item checked out successfully.'})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
