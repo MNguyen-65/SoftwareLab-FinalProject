@@ -12,53 +12,40 @@ function App() {
   const [itemToAdd, setItemToAdd] = useState('');
   const [itemQuantity, setItemQuantity] = useState(0);
   const [userItems, setUserItems] = useState({});
-  const handleLogin = () => {
-    console.log(username, password); // add this line
-    fetch('/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        username: username,
-        password: password
-      })
-    })
-    .then(res => {
-      // rest of the code here
-    })
-    .catch(err => {
-      // rest of the code here
-    });
-  };
-  // const handleLogin = () => {
-  //   console.log(username, password); // add this line
-  //   axios.post('/login', {username: username, password: password})
-  //     .then(response => {
-  //       if (response.data.success) {
-  //         setLoggedIn(true);
-  //         setUserItems(response.data.user.Items);
-  //       } else {
-  //         alert(response.data.message);
-  //       }
-  //     })
-  //     .catch(error => {
-  //       console.log(error);
-  //     });
-  // };
+  const [success, setSuccess] = useState(false);
 
-  const handleAddUser = () => {
-    axios.post('/add_user', {username: username, password: password, first_name: firstName, last_name: lastName, email: email})
-      .then(response => {
-        alert(response.data.message);
+
+  const handleLogin = () => {
+    axios.post('/login', {username: username, password: password})
+      .then(res => {
+        if (res.data.success) {
+          setSuccess(true);
+        } else {
+          alert('Login failed. Please try again.');
+        }
       })
-      .catch(error => {
-        console.log(error);
+      .catch(err => {
+        console.log(err);
       });
   };
 
-  const handleGetInventory = () => {
-    axios.get('/getInventory')
+
+  const handleAddUser = () => {
+    axios.post('/add_user', {username: username, password: password})
+      .then(res => {
+        if (res.data.success) {
+          setSuccess(true);
+        } else {
+          alert('Account creation failed. Please try again.');
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
+
+  const handleRefreshProjects = () => {
+    axios.get('/refreshInventory')
       .then(response => {
         setInventory(response.data.inventory);
       })
@@ -95,9 +82,10 @@ function App() {
       });
   };
 
+  
   return (
     <div>
-      {!loggedIn && (
+      {!success && (
         <div>
           <h2>Login</h2>
           <input type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
@@ -121,10 +109,10 @@ function App() {
       <button onClick={handleAddUser}>Add User</button>
     </div>
   )}
-  {loggedIn && (
+  {success && (
     <div>
       <h2>Inventory</h2>
-      <button onClick={handleGetInventory}>Refresh Inventory</button>
+      <button onClick={handleRefreshProjects}>Refresh Projects</button>
       <ul>
         {inventory.map(item => (
           <li key={item.name}>

@@ -32,7 +32,7 @@ def login():
     print('debug 32')
     user = client.HardwareCheckout.People.find_one({'username': username})    # access the hardware checkout database -> users collection
     client.close()
-    if user and user['Password'] == password:
+    if user and user['password'] == password:
         return jsonify({'success': True, 'message': 'Login successful!'})
     else:
         return jsonify({'success': False, 'message': 'Invalid username or password.'})
@@ -44,7 +44,7 @@ def login():
 def add_user():
     print(f"Attempting AddUser {request.json}")
     username = request.json.get('username')
-    password = request.json.get('Password')
+    password = request.json.get('password')
 
     client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
 
@@ -55,7 +55,7 @@ def add_user():
         return jsonify({'success': False, 'message': 'User already exists.'})
 
     # If the user doesn't exist already, add them to the database
-    new_user = {'username': username, 'Password': password}
+    new_user = {'username': username, 'password': password}
     result = client.HardwareCheckout.People.insert_one(new_user)
     client.close()
 
@@ -125,7 +125,7 @@ def add_hardware_set():
 def check_in():
     username = request.json.get('username')
     hardwareItem = request.json.get('HardwareItem')
-    quantity = request.json.get('Quantity')
+    quantity = request.json.get('quantity')
     
     # Check if the user exists in the database
     user = mongo.HardwareCheckout.Users.find_one({'username': username})
@@ -158,7 +158,7 @@ def check_in():
 def check_out():
     username = request.json.get('username')
     hardwareItem = request.json.get('HardwareItem')
-    quantity = request.json.get('Quantity')
+    quantity = request.json.get('quantity')
 
     # Check if the user exists in the database
     user = mongo.HardwareCheckout.Users.find_one({'username': username})
@@ -175,7 +175,7 @@ def check_out():
         return jsonify({'success': False, 'message': f'Not enough quantity of {hardwareItem} available'})
 
     # Checkout the item and update the inventory
-    item['Quantity'] -= quantity
+    item['quantity'] -= quantity
 
     # Add the quantity of hardwareItem to the user's profile
     if hardwareItem in user['Items']:
