@@ -1,5 +1,4 @@
 from flask import Flask, request, jsonify
-# from flask_pymongo import PyMongo
 from pymongo import MongoClient
 
 from bson.objectid import ObjectId
@@ -26,11 +25,12 @@ def login():
 
     client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
 
-    username = request.json.get('username') # username, password are taken in from the webpage html
+    username = request.json.get('username')
+    userid = request.json.get('userid')
     password = request.json.get('password')
 
     print('debug 32')
-    user = client.HardwareCheckout.People.find_one({'username': username})    # access the hardware checkout database -> users collection
+    user = client.HardwareCheckout.People.find_one({'username': username, 'userid': userid})    # access the hardware checkout database -> users collection
     client.close()
     if user and user['password'] == password:
         return jsonify({'success': True, 'message': 'Login successful!'})
@@ -44,22 +44,41 @@ def login():
 def add_user():
     print(f"Attempting AddUser {request.json}")
     username = request.json.get('username')
+    userid = request.json.get('userid')
     password = request.json.get('password')
 
     client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
 
     # Check if the user already exists in the database
     # existing_user = mongo.HardwareCheckout.Users.find_one({'username': username})
-    existing_user = client.HardwareCheckout.People.find_one({'username': username})
+    existing_user = client.HardwareCheckout.People.find_one({'username': username, 'userid': userid})
     if existing_user:
         return jsonify({'success': False, 'message': 'User already exists.'})
 
     # If the user doesn't exist already, add them to the database
-    new_user = {'username': username, 'password': password}
+    new_user = {
+        'username': username,
+        'userid': userid,
+        'password': password, 
+        'projects': []
+    }
     result = client.HardwareCheckout.People.insert_one(new_user)
     client.close()
 
     return jsonify({'success': True, 'message': 'User added successfully.'})
+
+
+@app.route('/get_projects', methods=['GET'])
+def get_projects():
+    username = request.json.get('username')
+    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+
+    user = client.HardwareCheckout.People.find_one({'username': username})
+    projects = user['projects']
+
+    return jsonify(projects)
+
+
 
 '''
 Structure of Project entry so far:
@@ -67,6 +86,7 @@ Project = {
     "Name": projectName,
     "ProjectID": projectID,
     "Description": description
+    "Users": [usernames, ...]
     "HardwareSets": [HW1_ID, HW2_ID, ...]
     # Should probably be a map with HWSetName and amount used by this project
 }
@@ -77,7 +97,9 @@ def add_project():
     projectID = request.json.get('ProjectID')
     description = request.json.get('Description')
 
-    db = mongo.HardwareCheckout
+    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+
+    db = client.HardwareCheckout
     projects = db.Projects
     success = False
     
@@ -86,11 +108,15 @@ def add_project():
         doc = {
             "Name": projectName,
             "ProjectID": projectID,
-            "Description": description
+            "Description": description,
+            "Users": [],
+            "HardwareSets": {}
         }
         projects.insert_one(doc)
+        client.close()
         return jsonify({'success': True, 'message': 'Project added successfully.'})
 
+    client.close()
     return jsonify({'success': False, 'message': 'Project already exists.'})
 
 
@@ -144,7 +170,7 @@ def check_in():
     quantity = request.json.get('quantity')
     
     # Check if the user exists in the database
-    user = mongo.HardwareCheckout.Users.find_one({'username': username})
+    user = mongo.HardwareCheckout.People.find_one({'username': username})
     if not user:
         return jsonify({'success': False, 'message': 'username invalid. Unable to check in item'})
 
@@ -164,7 +190,7 @@ def check_in():
         user['Items'][item_name] = quantity
     else:
         user['Items'][item_name] += quantity
-    mongo.HardwareCheckout.Users.update_one({'_id': user['_id']}, {'$set': {'Items': user['Items']}})
+    mongo.HardwareCheckout.People.update_one({'_id': user['_id']}, {'$set': {'Items': user['Items']}})
 
     # return json success message
     return jsonify({'success': True, 'message': f'Item {hardwareItem} checked in successfully.'})
@@ -177,7 +203,7 @@ def check_out():
     quantity = request.json.get('quantity')
 
     # Check if the user exists in the database
-    user = mongo.HardwareCheckout.Users.find_one({'username': username})
+    user = mongo.HardwareCheckout.People.find_one({'username': username})
     if not user:
         return jsonify({'success': False, 'message': 'username invalid. Unable to check in item'})
 
@@ -206,7 +232,7 @@ def check_out():
 
     # mongo.HardwareCheckout.HardwareSets refers to the HardwareSets collection in the mongoDB
     mongo.HardwareCheckout.HardwareSets.update_one({'_id': item['_id']}, {'$set': {'Available': item['Available']}})
-    mongo.HardwareCheckout.Users.update_one({'_id': user['_id']}, {'$set': {'Items': user['Items']}})
+    mongo.HardwareCheckout.People.update_one({'_id': user['_id']}, {'$set': {'Items': user['Items']}})
 
     return jsonify({'success': True, 'message': 'Item checked out successfully.'})
 

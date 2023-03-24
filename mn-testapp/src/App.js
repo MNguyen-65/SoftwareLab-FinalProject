@@ -4,6 +4,7 @@ import axios from 'axios';
 function App() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [username, setUsername] = useState('');
+  const [userid, setUserid] = useState('');
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -16,12 +17,12 @@ function App() {
 
 
   const handleLogin = () => {
-    axios.post('/login', {username: username, password: password})
+    axios.post('/login', {username: username, userid: userid, password: password})
       .then(res => {
         if (res.data.success) {
           setSuccess(true);
         } else {
-          alert('Login failed. Please try again.');
+          alert('Login failed. Please try again.'); // Might want to return error message
         }
       })
       .catch(err => {
@@ -31,7 +32,7 @@ function App() {
 
 
   const handleAddUser = () => {
-    axios.post('/add_user', {username: username, password: password})
+    axios.post('/add_user', {username: username, userid: userid, password: password})
       .then(res => {
         if (res.data.success) {
           setSuccess(true);
@@ -45,7 +46,7 @@ function App() {
   };
 
   const handleRefreshProjects = () => {
-    axios.get('/api/inventory')
+    axios.get('/get_projects')
       .then(response => {
         setUserItems(response.data);
       })
@@ -90,12 +91,16 @@ function App() {
           <h2>Login</h2>
           <input type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
           <br />
+          <input type="text" placeholder="UserID" value={userid} onChange={e => setUserid(e.target.value)} />
+          <br />
           <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
           <br />
           <button onClick={handleLogin}>Login</button>
           <br />
           <h2>Add User</h2>
           <input type="text" placeholder="Username" value={username} onChange={e => setUsername(e.target.value)} />
+          <br />
+          <input type="text" placeholder="UserID" value={userid} onChange={e => setUserid(e.target.value)} />
           <br />
           <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
           <br />
@@ -112,14 +117,14 @@ function App() {
   {success && (
     <div>
       <h2>Inventory</h2>
-      <button onClick={handleRefreshProjects}>Refresh Projects</button>
+      {/* <button onClick={handleRefreshProjects}>Refresh Projects</button>
       <ul>
         {inventory.map(item => (
           <li key={item.name}>
             {item.name}: {item.quantity}
           </li>
         ))}
-      </ul>
+      </ul> */}
       <h2>Check In</h2>
       <input type="text" placeholder="Item Name" value={itemToAdd} onChange={e => setItemToAdd(e.target.value)} />
       <br />
@@ -133,15 +138,24 @@ function App() {
       <br />
       <button onClick={handleCheckOut}>Check Out</button>
       <h2>My Projects</h2>
+      <button onClick={handleRefreshProjects}>Refresh Projects</button>
       <ul>
+        {userItems.map(project => (
+          <li key={item}>
+            {item}
+          </li>
+        ))}
+      </ul>
+
+      {/* <ul>
         {console.log("137 debug react")}
         {console.log(userItems)}
-        {Object.entries(userItems).map(([name, description, projectid]) => (
+        {userItems.map(([name, description, projectid]) => (
           <li key={name}>
             {name}: {description}
           </li>
         ))}
-      </ul>
+      </ul> */}
     </div>
   )}
 </div>
