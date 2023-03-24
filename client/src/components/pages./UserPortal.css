@@ -1,0 +1,10 @@
+.Project {
+    border-style: solid;
+    border-color: black;
+    margin: 20px;
+}
+
+.Checkout {
+    float: right;
+    margin-left: 40px;
+}
