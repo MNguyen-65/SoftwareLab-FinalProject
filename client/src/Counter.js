@@ -13,17 +13,13 @@ class Counter extends Component {
     };
 
     incrementAvailable = () =>  {
-        if(this.state.available <= 0) {
-
-        }
-
-        if(this.state.available <= this.state.total) {
+        if(this.state.available == this.state.total) {
 
         }
 
         else {
             this.setState({available: this.state.available + 1})
-            this.setState({used: this.state.total - this.state.available - 1})
+            this.setState({used: this.state.used - 1})
         }
     };
 
@@ -49,13 +45,13 @@ class Counter extends Component {
             <p>  Total Servers <b> | </b> </p>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <span> <b> {this.state.available} </b> </span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <p> Available Servers </p> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button type="submit" onClick={this.incrementAvailable} style={{ backgroundColor: '#71FF33', border: 'none', color: 'black', padding: '10px', borderRadius: '5px' }}>
+            <button type="submit" onClick={this.incrementAvailable} style={{ backgroundColor: '#64FF33', border: 'none', color: 'FF5B33', padding: '10px', borderRadius: '5px' }}>
               Check In Server From Deployment
             </button> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
             <p> <b> | </b> </p> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
             <span> <b> {this.state.used} </b> </span> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
             <p> Servers Under Deployment </p> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-            <button type="submit" onClick={this.incrementAvailable} style={{ backgroundColor: '#71FF33', border: 'none', color: 'black', padding: '10px', borderRadius: '5px' }}>
+            <button type="submit" onClick={this.incrementUsed} style={{ backgroundColor: '#64FF33', border: 'none', color: 'FF5B33', padding: '10px', borderRadius: '5px' }}>
             Check Out Server From Deployment 
             </button> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
             </Box>
