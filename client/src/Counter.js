@@ -13,30 +13,51 @@ class Counter extends Component {
     };
 
     incrementAvailable = () =>  {
-        this.setState({available: this.state.available + 1})
-        this.setState({used: this.state.total - this.state.available - 1})
+        if(this.state.available <= 0) {
+
+        }
+
+        if(this.state.available <= this.state.total) {
+
+        }
+
+        else {
+            this.setState({available: this.state.available + 1})
+            this.setState({used: this.state.total - this.state.available - 1})
+        }
     };
 
     incrementUsed = () => {
-        this.setState({used: this.state.used + 1})
-        this.setState({available: this.state.available - 1})
+        if(this.state.used >= this.state.total) {
+
+        }
+        
+        else {
+            this.setState({used: this.state.used + 1})
+            this.setState({available: this.state.available - 1})
+        }
     }
 
     render () {
         return (
             <div>
+            <p> Welcome to the server checkout! </p>
             <Box sx={{ display: 'flex', flexDirection: 'column'}}>
-            <Box sx={{ display: 'flex', mb: 2, border: '10px solid #C8E6C9' }}>
-            <Box sx={{  display: 'flex', alignItems: 'center', mt: -2 }}>   
-            <span ststyle={{ textAlign: 'left' }}> {this.state.total} </span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-            <p> Total Number of Servers | </p>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <span> {this.state.available} </span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <Box sx={{ display: 'flex', mb: 2, border: '10px solid #33FFF9' }}>
+            <Box sx={{  display: 'flex', alignItems: 'center', mt: 0 }}>   
+            <span ststyle={{ textAlign: 'left' }}> <b> {this.state.total} </b> </span> &nbsp;&nbsp;
+            <p>  Total Servers <b> | </b> </p>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <span> <b> {this.state.available} </b> </span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             <p> Available Servers </p> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <button type="submit" onClick={this.incrementAvailable}> Check Out Server  </button> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <p> | </p> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-            <span> {this.state.used} </span> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+            <button type="submit" onClick={this.incrementAvailable} style={{ backgroundColor: '#71FF33', border: 'none', color: 'black', padding: '10px', borderRadius: '5px' }}>
+              Check In Server From Deployment
+            </button> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+            <p> <b> | </b> </p> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+            <span> <b> {this.state.used} </b> </span> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
             <p> Servers Under Deployment </p> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
-            <button type="submit" onClick={this.incrementUsed}> Check In Server </button> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+            <button type="submit" onClick={this.incrementAvailable} style={{ backgroundColor: '#71FF33', border: 'none', color: 'black', padding: '10px', borderRadius: '5px' }}>
+            Check Out Server From Deployment 
+            </button> &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
             </Box>
             </Box>
             </Box>
