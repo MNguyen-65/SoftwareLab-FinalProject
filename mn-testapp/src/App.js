@@ -45,9 +45,9 @@ function App() {
   };
 
   const handleRefreshProjects = () => {
-    axios.get('/refreshInventory')
+    axios.get('/api/inventory')
       .then(response => {
-        setInventory(response.data.inventory);
+        setUserItems(response.data);
       })
       .catch(error => {
         console.log(error);
@@ -132,11 +132,13 @@ function App() {
       <input type="number" placeholder="Quantity" value={itemQuantity} onChange={e => setItemQuantity(parseInt(e.target.value))} />
       <br />
       <button onClick={handleCheckOut}>Check Out</button>
-      <h2>My Items</h2>
+      <h2>My Projects</h2>
       <ul>
-        {Object.entries(userItems).map(([itemName, quantity]) => (
-          <li key={itemName}>
-            {itemName}: {quantity}
+        {console.log("137 debug react")}
+        {console.log(userItems)}
+        {Object.entries(userItems).map(([name, description, projectid]) => (
+          <li key={name}>
+            {name}: {description}
           </li>
         ))}
       </ul>

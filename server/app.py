@@ -119,6 +119,22 @@ def add_hardware_set():
 
     hwsets.insert_one(doc)
 
+@app.route('/api/inventory', methods=['GET'])
+def check_inventory():
+    print("testing check inv")
+    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+
+    projects = []
+    for project in client.HardwareCheckout.Projects.find():
+        projects.append({
+            'name': project['name'],
+            'projectid': project['projectid'],
+            'description': project['description']
+            
+            # add more fields as needed
+        })
+    return jsonify(projects)
+
 # Function tries to create a user with their provided username and Password
 # Returns json specfiying if the user creation was successful or not
 @app.route('/check_in', methods=['POST'])
