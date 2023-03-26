@@ -1,59 +1,68 @@
 from pymongo import MongoClient
 
-MONGODB_SERVER = "mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority"
+MONGODB_SERVER = 'mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority'
 
 '''
 Structure of User entry so far:
 User = {
-    "Username": username,
-    "UserID": userid,
-    "Password": password,
-    "Projects": [project1_ID, project2_ID, ...]
+    'username': username,
+    'userid': userid,
+    'password': password,
+    'projects': [project1_ID, project2_ID, ...]
 }
 '''
 
 def addUser(username, userid, password):
     client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
-    users = db.Users
-    success = False
+    people = db.People
 
-    # Should check if username & userID are unique
-    if users.find({"Username": username, "UserID": userid}).count() == 0:
-        # Give list of projects they own?
+    existing_user = people.find_one({'username': username, 'userid': userid})
+    if existing_user == None:
         doc = {
-            "Username": username,
-            "UserID": userid,
-            "Password": password
+            'username': username,
+            'userid': userid,
+            'password': password,
+            'projects': []
         }
 
-        users.insert_one(doc)
+        people.insert_one(doc)
         success = True
+        message = 'Successfully added user'
+    else:
+        success = False
+        message = 'Username or ID already taken'
+        # u = existing_user['username']
+        # uid = existing_user['userid']
+        # pa = existing_user['password']
+        # print(f'{u}, {uid}, {pa}')
     
     client.close()
 
-    return success
+    return success, message
 
-# Don't want user accessing documents directly
+
 def __queryUser(username, userid):
     client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
-    users = db.Users
+    people = db.People
 
-    query = {"Username": username, "UserID": userid}
-    doc = users.find_one(query)
+    query = {'username': username, 'userid': userid}
+    doc = people.find_one(query)
     client.close()
 
     return doc
 
-# Idea: return -1 for user doesn't exist, 0 for incorrect
-#       password, and 1 for successful login
+
 def login(username, userid, password):
     doc = __queryUser(username, userid)
-    if(doc == None):
-        # User doesn't exist
-        return False
+
     # TODO: encrypt password here
-    return doc['password'] == password
+    if(doc == None):
+        return False, 'Invalid username or ID. Try again'
+    elif(doc['password'] == password):
+        return True, 'Login successful'
+    else:
+        return False, 'Invalid password. Try again'
 
 # def addProject(username, userid, projectID):

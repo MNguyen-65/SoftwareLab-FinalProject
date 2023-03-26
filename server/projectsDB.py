@@ -1,15 +1,15 @@
 from pymongo import MongoClient
 
-MONGODB_SERVER = "mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority"
+MONGODB_SERVER = 'mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority'
 
 '''
 Structure of Project entry so far:
 Project = {
-    "Name": projectName,
-    "ProjectID": projectID,
-    "Description": description
-    "HardwareSets": [HW1_ID, HW2_ID, ...]
-    # Should probably be a map with HWSetName and amount used by this project
+    'name': projectName,
+    'projectid': projectID,
+    'description': description
+    'hwsets': {HW1: 0, HW2: 10, ...}
+    'users': [user1, user2, ...]
 }
 '''
 
@@ -17,30 +17,34 @@ def addProject(projectName, projectID, description):
     client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
-    success = False
     
-    # Keep track of HW sets for this project
-    if projects.find({"Name": projectName, "ProjectID": projectID}).count() == 0:
+    if not projects.find({'name': projectName, 'projectid': projectID}):
         doc = {
-            "Name": projectName,
-            "ProjectID": projectID,
-            "Description": description
+            'name': projectName,
+            'projectid': projectID,
+            'description': description,
+            'hwsets': {},
+            'users': []
         }
         projects.insert_one(doc)
+        
         success = True
+        message = 'Successfully added project'
+    else:
+        success = False
+        message = 'Project name or ID already taken'
 
     client.close()
 
-    return success
+    return success, message
 
-# Might have to be private
-# Can either query based on project name or ID
+
 def queryProject(projectID):
     client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
 
-    query = {"ProjectID": projectID}
+    query = {'projectid': projectID}
     doc = projects.find_one(query)
     client.close()
 

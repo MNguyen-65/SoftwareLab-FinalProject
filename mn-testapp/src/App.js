@@ -6,10 +6,10 @@ function App() {
   const [username, setUsername] = useState('');
   const [userid, setUserid] = useState('');
   const [password, setPassword] = useState('');
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [inventory, setInventory] = useState([]);
+  const [firstName, setFirstName] = useState('');   // TODO: unnecessary
+  const [lastName, setLastName] = useState('');     // TODO: unnecessary
+  const [email, setEmail] = useState('');           // TODO: unnecessary
+  const [inventory, setInventory] = useState([]);   // TODO: implement later on
   const [itemToAdd, setItemToAdd] = useState('');
   const [itemQuantity, setItemQuantity] = useState(0);
   const [userItems, setUserItems] = useState({});
@@ -22,7 +22,7 @@ function App() {
         if (res.data.success) {
           setSuccess(true);
         } else {
-          alert('Login failed. Please try again.'); // Might want to return error message
+          alert(res.data.message); // Might want to return error message
         }
       })
       .catch(err => {
@@ -37,7 +37,7 @@ function App() {
         if (res.data.success) {
           setSuccess(true);
         } else {
-          alert('Account creation failed. Please try again.');
+          alert(res.data.message);
         }
       })
       .catch(err => {
@@ -103,16 +103,17 @@ function App() {
           <input type="text" placeholder="UserID" value={userid} onChange={e => setUserid(e.target.value)} />
           <br />
           <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} />
+          
+          {/* TODO: remove unnecessary fields */}
           <br />
           <input type="text" placeholder="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} />
           <br />
           <input type="text" placeholder="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} />
           <br />
-          <input type="text" placeholder="Email" value={email} onChange={e => setEmail(e.target.value
-      )} />
-      <br />
-      <button onClick={handleAddUser}>Add User</button>
-    </div>
+          <input type="text" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} />
+          <br />
+          <button onClick={handleAddUser}>Add User</button>
+        </div>
   )}
   {success && (
     <div>
@@ -139,13 +140,13 @@ function App() {
       <button onClick={handleCheckOut}>Check Out</button>
       <h2>My Projects</h2>
       <button onClick={handleRefreshProjects}>Refresh Projects</button>
-      <ul>
+      {/* <ul>
         {userItems.map(project => (
           <li key={item}>
             {item}
           </li>
         ))}
-      </ul>
+      </ul> */}
 
       {/* <ul>
         {console.log("137 debug react")}

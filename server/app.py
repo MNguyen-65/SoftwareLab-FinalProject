@@ -1,71 +1,48 @@
 from flask import Flask, request, jsonify
 from pymongo import MongoClient
-
 from bson.objectid import ObjectId
 
-app = Flask(__name__)
-app.config['MONGO_URI'] ="mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority"
+import usersDB
+import projectsDB
+import hardwareDB
 
-# client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+app = Flask(__name__)
 
 '''
 Structure of User entry so far:
 User = {
     "username": username,
-    "UserID": userid,
-    "Password": password,
-    "Items": {item1:qty1, item2:qty2, ....}
+    "userid": userid,
+    "password": password,
+    "projects": [project1, ...]
 }
 '''
 # Function tries to login a user with their provided username and Password
 # Returns json specfiying if the user login attempt was successful or not
 @app.route('/login', methods=['POST'])
 def login():
-    print("Attempting login")
-
-    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
-
+    # print("Attempting login")
     username = request.json.get('username')
     userid = request.json.get('userid')
     password = request.json.get('password')
 
-    print('debug 32')
-    user = client.HardwareCheckout.People.find_one({'username': username, 'userid': userid})    # access the hardware checkout database -> users collection
-    client.close()
-    if user and user['password'] == password:
-        return jsonify({'success': True, 'message': 'Login successful!'})
-    else:
-        return jsonify({'success': False, 'message': 'Invalid username or password.'})
+    success, message = usersDB.login(username, userid, password)
+
+    return jsonify({'success': success, 'message': message})
 
 
 # Function tries to create a user with their provided username and Password
 # Returns json specfiying if the user creation was successful or not
 @app.route('/add_user', methods=['POST'])
 def add_user():
-    print(f"Attempting AddUser {request.json}")
+    # print(f"Attempting AddUser {request.json}")
     username = request.json.get('username')
     userid = request.json.get('userid')
     password = request.json.get('password')
 
-    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+    success, message = usersDB.addUser(username, userid, password)
 
-    # Check if the user already exists in the database
-    # existing_user = mongo.HardwareCheckout.Users.find_one({'username': username})
-    existing_user = client.HardwareCheckout.People.find_one({'username': username, 'userid': userid})
-    if existing_user:
-        return jsonify({'success': False, 'message': 'User already exists.'})
-
-    # If the user doesn't exist already, add them to the database
-    new_user = {
-        'username': username,
-        'userid': userid,
-        'password': password, 
-        'projects': []
-    }
-    result = client.HardwareCheckout.People.insert_one(new_user)
-    client.close()
-
-    return jsonify({'success': True, 'message': 'User added successfully.'})
+    return jsonify({'success': success, 'message': message})
 
 
 @app.route('/get_projects', methods=['GET'])
@@ -83,41 +60,25 @@ def get_projects():
 '''
 Structure of Project entry so far:
 Project = {
-    "Name": projectName,
-    "ProjectID": projectID,
-    "Description": description
-    "Users": [usernames, ...]
-    "HardwareSets": [HW1_ID, HW2_ID, ...]
+    "name": projectName,
+    "projectid": projectID,
+    "description": description
+    "users": [user1, user2, ...]
+    "hwsets": {'HW1': 0, 'HW2': 10, ...}
     # Should probably be a map with HWSetName and amount used by this project
 }
 '''
+
+
 @app.route('/add_project', methods=['POST'])
 def add_project():
-    projectName = request.json.get('Name')
-    projectID = request.json.get('ProjectID')
-    description = request.json.get('Description')
+    projectName = request.json.get('name')
+    projectID = request.json.get('projectid')
+    description = request.json.get('description')
 
-    client = MongoClient("mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority")
+    success, message = projectsDB.addProject(projectName, projectID, description)
 
-    db = client.HardwareCheckout
-    projects = db.Projects
-    success = False
-    
-    # Keep track of HW sets for this project
-    if projects.find({"Name": projectName, "ProjectID": projectID}).count() == 0:
-        doc = {
-            "Name": projectName,
-            "ProjectID": projectID,
-            "Description": description,
-            "Users": [],
-            "HardwareSets": {}
-        }
-        projects.insert_one(doc)
-        client.close()
-        return jsonify({'success': True, 'message': 'Project added successfully.'})
-
-    client.close()
-    return jsonify({'success': False, 'message': 'Project already exists.'})
+    return jsonify({'success': success, 'message': message})
 
 
 '''
