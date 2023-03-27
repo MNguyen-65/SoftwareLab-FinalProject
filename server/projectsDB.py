@@ -13,20 +13,20 @@ Project = {
 }
 '''
 
-def queryProject(projectId):
-    client = MongoClient(MONGODB_SERVER)
+def queryProject(client, projectId):
+    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
 
     query = {'projectId': projectId}
     doc = projects.find_one(query)
-    client.close()
+    # client.close()
 
     return doc
 
 
-def createProject(projectName, projectId, description):
-    client = MongoClient(MONGODB_SERVER)
+def createProject(client, projectName, projectId, description):
+    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
     
@@ -46,13 +46,13 @@ def createProject(projectName, projectId, description):
         success = False
         message = 'Project ID already taken'
 
-    client.close()
+    # client.close()
 
     return success, message
 
 
-def addUser(projectId, userid):
-    client = MongoClient(MONGODB_SERVER)
+def addUser(client, projectId, userid):
+    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
 
@@ -60,4 +60,4 @@ def addUser(projectId, userid):
     newValue = {'$push': {'users': projectId}}
     projects.update_one(filter, newValue)
     
-    client.close()
+    # client.close()

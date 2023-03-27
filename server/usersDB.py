@@ -14,8 +14,8 @@ User = {
 }
 '''
 
-def addUser(username, userId, password):
-    client = MongoClient(MONGODB_SERVER)
+def addUser(client, username, userId, password):
+    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     people = db.People
 
@@ -34,30 +34,26 @@ def addUser(username, userId, password):
     else:
         success = False
         message = 'Username or ID already taken'
-        # u = existing_user['username']
-        # uid = existing_user['userId']
-        # pa = existing_user['password']
-        # print(f'{u}, {uid}, {pa}')
     
-    client.close()
+    # client.close()
 
     return success, message
 
 
-def __queryUser(username, userId):
-    client = MongoClient(MONGODB_SERVER)
+def __queryUser(client, username, userId):
+    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     people = db.People
 
     query = {'username': username, 'userId': userId}
     doc = people.find_one(query)
-    client.close()
+    # client.close()
 
     return doc
 
 
-def login(username, userId, password):
-    doc = __queryUser(username, userId)
+def login(client, username, userId, password):
+    doc = __queryUser(client, username, userId)
 
     # TODO: encrypt password here
     if(doc == None):
@@ -67,15 +63,15 @@ def login(username, userId, password):
     else:
         return False, 'Invalid password. Try again'
 
-def joinProject(userId, projectId):
-    client = MongoClient(MONGODB_SERVER)
+def joinProject(client, userId, projectId):
+    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     people = db.People
 
     success = False;
     userProjects = people.find_one({'userId': userId})['projects']
 
-    if projectsDB.queryProject(projectId) == None:
+    if projectsDB.queryProject(client, projectId) == None:
         message = 'Project ID does not exist'
     elif projectId in userProjects:
         message = 'User is already in this project'
@@ -83,10 +79,10 @@ def joinProject(userId, projectId):
         filter = {'userId': userId}
         newValue = {'$push': {'projects': projectId}}
         people.update_one(filter, newValue)
-        projectsDB.addUser(projectId, userId)
+        projectsDB.addUser(client, projectId, userId)
         success = True;
         message = 'Successfully added project'
 
-    client.close()
+    # client.close()
 
     return success, message

@@ -6,6 +6,8 @@ import usersDB
 import projectsDB
 import hardwareDB
 
+MONGODB_SERVER = 'mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority'
+
 app = Flask(__name__)
 
 
@@ -17,7 +19,9 @@ def login():
     userId = request.json.get('userId')
     password = request.json.get('password')
 
-    success, message = usersDB.login(username, userId, password)
+    client = MongoClient(MONGODB_SERVER)
+    success, message = usersDB.login(client, username, userId, password)
+    client.close()
 
     return jsonify({'success': success, 'message': message})
 
@@ -30,7 +34,9 @@ def add_user():
     userId = request.json.get('userId')
     password = request.json.get('Password')
 
-    success, message = usersDB.addUser(username, userId, password)
+    client = MongoClient(MONGODB_SERVER)
+    success, message = usersDB.addUser(client, username, userId, password)
+    client.close()
 
     return jsonify({'success': success, 'message': message})
 
@@ -42,11 +48,15 @@ def create_project():
     projectId = request.json.get('projectId')
     description = request.json.get('description')
 
-    success, message = projectsDB.createProject(projectName, projectId, description)
+    client = MongoClient(MONGODB_SERVER)
+    success, message = projectsDB.createProject(client, projectName, projectId, description)
     if not success:
+        client.close()
         return jsonify({'success': success, 'message': message})
     
-    success, message = usersDB.joinProject(userId, projectId)
+    success, message = usersDB.joinProject(client, userId, projectId)
+    client.close()
+
     return jsonify({'success': success, 'message': message})
 
 
@@ -55,7 +65,10 @@ def join_project():
     userId = request.json.get('userId')
     projectId = request.json.get('projectId')
     
-    success, message = usersDB.joinProject(userId, projectId)
+    client = MongoClient(MONGODB_SERVER)
+    success, message = usersDB.joinProject(client, userId, projectId)
+    client.close()
+
     return jsonify({'success': success, 'message': message})
 
 
@@ -65,7 +78,9 @@ def add_project():
     projectId = request.json.get('projectId')
     description = request.json.get('description')
 
-    success, message = projectsDB.addProject(projectName, projectId, description)
+    client = MongoClient(MONGODB_SERVER)
+    success, message = projectsDB.addProject(client, projectName, projectId, description)
+    client.close()
 
     return jsonify({'success': success, 'message': message})
 
