@@ -1,7 +1,5 @@
 from pymongo import MongoClient
 
-MONGODB_SERVER = 'mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority'
-
 '''
 Structure of Project entry so far:
 Project = {
@@ -14,19 +12,16 @@ Project = {
 '''
 
 def queryProject(client, projectId):
-    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
 
     query = {'projectId': projectId}
     doc = projects.find_one(query)
-    # client.close()
 
     return doc
 
 
 def createProject(client, projectName, projectId, description):
-    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
     
@@ -46,18 +41,13 @@ def createProject(client, projectName, projectId, description):
         success = False
         message = 'Project ID already taken'
 
-    # client.close()
-
     return success, message
 
 
 def addUser(client, projectId, userid):
-    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
 
     filter = {'projectId': userid}
     newValue = {'$push': {'users': projectId}}
     projects.update_one(filter, newValue)
-    
-    # client.close()

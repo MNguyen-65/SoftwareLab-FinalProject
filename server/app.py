@@ -30,15 +30,26 @@ def login():
 # Returns json specfiying if the user creation was successful or not
 @app.route('/add_user', methods=['POST'])
 def add_user():
-    username = request.json.get('Username')
+    username = request.json.get('username')
     userId = request.json.get('userId')
-    password = request.json.get('Password')
+    password = request.json.get('password')
 
     client = MongoClient(MONGODB_SERVER)
     success, message = usersDB.addUser(client, username, userId, password)
     client.close()
 
     return jsonify({'success': success, 'message': message})
+
+
+@app.route('/get_user_projects', methods=['GET'])
+def get_user_projects():
+    userId = request.json.get('userId')
+
+    client = MongoClient(MONGODB_SERVER)
+    projects = usersDB.getUserProjects(client)
+    client.close()
+
+    return jsonify(projects)
 
 
 @app.route('/create_project', methods=['POST'])
@@ -72,25 +83,12 @@ def join_project():
     return jsonify({'success': success, 'message': message})
 
 
-@app.route('/add_project', methods=['POST'])
-def add_project():
-    projectName = request.json.get('name')
-    projectId = request.json.get('projectId')
-    description = request.json.get('description')
-
-    client = MongoClient(MONGODB_SERVER)
-    success, message = projectsDB.addProject(client, projectName, projectId, description)
-    client.close()
-
-    return jsonify({'success': success, 'message': message})
-
-
 @app.route('/add_hardware', methods=['POST'])
 def add_hardware_set():
     hwSetName = request.json.get('name')
     initCapacity = request.json.get('initCapacity')
 
-    client = MongoClient('mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority')
+    client = MongoClient(MONGODB_SERVER)
 
     db = client.HardwareCheckout
     hwsets = db.HardwareSets
@@ -106,7 +104,7 @@ def add_hardware_set():
 @app.route('/api/inventory', methods=['GET'])
 def check_inventory():
     print('testing check inv')
-    client = MongoClient('mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority')
+    client = MongoClient(MONGODB_SERVER)
 
     projects = []
     for project in client.HardwareCheckout.Projects.find():
@@ -127,7 +125,7 @@ def check_in():
     hardwareItem = request.json.get('HardwareItem')
     quantity = request.json.get('quantity')
 
-    client = MongoClient('mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority')
+    client = MongoClient(MONGODB_SERVER)
 
     
     # Check if the user exists in the database
@@ -163,7 +161,7 @@ def check_out():
     hardwareItem = request.json.get('HardwareItem')
     quantity = request.json.get('quantity')
 
-    client = MongoClient('mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority')
+    client = MongoClient(MONGODB_SERVER)
 
     # Check if the user exists in the database
     user = client.HardwareCheckout.Users.find_one({'username': username})

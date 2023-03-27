@@ -157,6 +157,9 @@ function App() {
           </li>
         ))}
       </ul> */}
+      <h2>My Projects</h2>
+      {/* <ProjectList /> */}
+
       <h2>Create Project</h2>
       <input type="text" placeholder="Project Name" value={newProjectName} onChange={e => setNewProjectName(e.target.value)} />
       <br />
@@ -185,8 +188,8 @@ function App() {
       <br />
       <button onClick={handleCheckOut}>Check Out</button>
 
-      <h2>My Projects</h2>
-      <button onClick={handleRefreshProjects}>Refresh Projects</button>
+      {/* <h2>My Projects</h2>
+      <button onClick={handleRefreshProjects}>Refresh Projects</button> */}
       {/* <ul>
         {userItems.map(project => (
           <li key={item}>

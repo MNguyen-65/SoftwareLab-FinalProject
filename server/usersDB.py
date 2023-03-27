@@ -2,8 +2,6 @@ from pymongo import MongoClient
 
 import projectsDB
 
-MONGODB_SERVER = 'mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority'
-
 '''
 Structure of User entry so far:
 User = {
@@ -15,7 +13,6 @@ User = {
 '''
 
 def addUser(client, username, userId, password):
-    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     people = db.People
 
@@ -35,36 +32,31 @@ def addUser(client, username, userId, password):
         success = False
         message = 'Username or ID already taken'
     
-    # client.close()
-
     return success, message
 
 
 def __queryUser(client, username, userId):
-    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     people = db.People
 
     query = {'username': username, 'userId': userId}
     doc = people.find_one(query)
-    # client.close()
 
     return doc
 
 
 def login(client, username, userId, password):
-    doc = __queryUser(client, username, userId)
+    user = __queryUser(client, username, userId)
 
     # TODO: encrypt password here
-    if(doc == None):
+    if(user == None):
         return False, 'Invalid username or ID. Try again'
-    elif(doc['password'] == password):
-        return True, 'Login successful'
-    else:
+    elif(user['password'] != password):
         return False, 'Invalid password. Try again'
+    return True, 'Login successful'
+
 
 def joinProject(client, userId, projectId):
-    # client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     people = db.People
 
@@ -83,6 +75,17 @@ def joinProject(client, userId, projectId):
         success = True;
         message = 'Successfully added project'
 
-    # client.close()
-
     return success, message
+
+
+def getUserProjects(client, userId):
+    db = client.HardwareCheckout
+    people = db.People
+
+    userProjects = people.find_one({'userId': userId})['projects']
+    projects = []
+
+    for projectId in userProjects:
+        projects.append(projectsDB.queryProject(client, projectId))
+
+    return projects
