@@ -1,13 +1,13 @@
 from pymongo import MongoClient
 
-MONGODB_SERVER = "mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority"
+MONGODB_SERVER = 'mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority'
 
 '''
 Structure of Hardware Set entry so far:
 HardwareSet = {
-    "Name": hwSetName,
-    "Capacity": initialCapacity,
-    "Availability": initialCapacity
+    'hwName': hwSetName,
+    'capacity': initialCapacity,
+    'availability': initialCapacity
 }
 '''
 
@@ -16,14 +16,23 @@ def addHardwareSet(hwSetName, initCapacity):
     db = client.HardwareCheckout
     hwsets = db.HardwareSets
     
-    doc = {
-        "Name": hwSetName,
-        "Capacity": str(initCapacity),
-        "Availability": str(initCapacity)
-    }
+    if not hwsets.find({'hwName': hwSetName}):
+        doc = {
+            'hwName': hwSetName,
+            'capacity': str(initCapacity),
+            'availability': str(initCapacity)
+        }
+        hwsets.insert_one(doc)
+        
+        success = True
+        message = 'Successfully added hardware set'
+    else:
+        success = False
+        message = 'Name already taken by another hardware set'
 
-    hwsets.insert_one(doc)
     client.close()
+
+    return success, message
 
 # Might have to be private
 def queryHardwareSet(hwSetName):
@@ -31,7 +40,7 @@ def queryHardwareSet(hwSetName):
     db = client.HardwareCheckout
     hwsets = db.HardwareSets
 
-    query = {"Name": hwSetName}
+    query = {'hwName': hwSetName}
     doc = hwsets.find_one(query)
     client.close()
 
@@ -42,8 +51,8 @@ def updateAvailability(hwSetName, newAvailability):
     db = client.HardwareCheckout
     hwsets = db.HardwareSets
 
-    filter = {"Name": hwSetName}
-    newValue = {"$set": {"Availability": newAvailability}}
+    filter = {'hwName': hwSetName}
+    newValue = {'$set': {'availability': newAvailability}}
 
     hwsets.update_one(filter, newValue)
     client.close()

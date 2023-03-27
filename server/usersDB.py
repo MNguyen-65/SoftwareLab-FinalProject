@@ -1,59 +1,91 @@
 from pymongo import MongoClient
 
-MONGODB_SERVER = "mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority"
+import projectsDB
 
 '''
 Structure of User entry so far:
 User = {
-    "Username": username,
-    "UserID": userid,
-    "Password": password,
-    "Projects": [project1_ID, project2_ID, ...]
+    'username': username,
+    'userId': userId,
+    'password': password,
+    'projects': [project1_ID, project2_ID, ...]
 }
 '''
 
-def addUser(username, userid, password):
-    client = MongoClient(MONGODB_SERVER)
+def addUser(client, username, userId, password):
     db = client.HardwareCheckout
-    users = db.Users
-    success = False
+    people = db.People
 
-    # Should check if username & userID are unique
-    if users.find({"Username": username, "UserID": userid}).count() == 0:
-        # Give list of projects they own?
+    existing_user = people.find_one({'username': username, 'userId': userId})
+    if existing_user == None:
         doc = {
-            "Username": username,
-            "UserID": userid,
-            "Password": password
+            'username': username,
+            'userId': userId,
+            'password': password,
+            'projects': []
         }
 
-        users.insert_one(doc)
+        people.insert_one(doc)
         success = True
+        message = 'Successfully added user'
+    else:
+        success = False
+        message = 'Username or ID already taken'
     
-    client.close()
+    return success, message
 
-    return success
 
-# Don't want user accessing documents directly
-def __queryUser(username, userid):
-    client = MongoClient(MONGODB_SERVER)
+def __queryUser(client, username, userId):
     db = client.HardwareCheckout
-    users = db.Users
+    people = db.People
 
-    query = {"Username": username, "UserID": userid}
-    doc = users.find_one(query)
-    client.close()
+    query = {'username': username, 'userId': userId}
+    doc = people.find_one(query)
 
     return doc
 
-# Idea: return -1 for user doesn't exist, 0 for incorrect
-#       password, and 1 for successful login
-def login(username, userid, password):
-    doc = __queryUser(username, userid)
-    if(doc == None):
-        # User doesn't exist
-        return False
-    # TODO: encrypt password here
-    return doc['password'] == password
 
-# def addProject(username, userid, projectID):
+def login(client, username, userId, password):
+    user = __queryUser(client, username, userId)
+
+    # TODO: encrypt password here
+    if(user == None):
+        return False, 'Invalid username or ID. Try again'
+    elif(user['password'] != password):
+        return False, 'Invalid password. Try again'
+    return True, 'Login successful'
+
+
+def joinProject(client, userId, projectId):
+    db = client.HardwareCheckout
+    people = db.People
+
+    success = False;
+    userProjects = people.find_one({'userId': userId})['projects']
+
+    if projectsDB.queryProject(client, projectId) == None:
+        message = 'Project ID does not exist'
+    elif projectId in userProjects:
+        message = 'User is already in this project'
+    else:
+        filter = {'userId': userId}
+        newValue = {'$push': {'projects': projectId}}
+        people.update_one(filter, newValue)
+        projectsDB.addUser(client, projectId, userId)
+        success = True;
+        message = 'Successfully added project'
+
+    return success, message
+
+
+def getUserProjects(client, userId):
+    db = client.HardwareCheckout
+    people = db.People
+
+    userProjects = people.find_one({'userId': userId})['projects']
+    projects = []
+
+    for projectId in userProjects:
+        projects.append(projectsDB.queryProject(client, projectId))
+
+    return projects
