@@ -5,25 +5,37 @@ MONGODB_SERVER = 'mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net
 '''
 Structure of Project entry so far:
 Project = {
-    'name': projectName,
-    'projectid': projectID,
+    'projectName': projectName,
+    'projectId': projectId,
     'description': description
-    'hwsets': {HW1: 0, HW2: 10, ...}
+    'hwSets': {HW1: 0, HW2: 10, ...}
     'users': [user1, user2, ...]
 }
 '''
 
-def addProject(projectName, projectID, description):
+def queryProject(projectId):
+    client = MongoClient(MONGODB_SERVER)
+    db = client.HardwareCheckout
+    projects = db.Projects
+
+    query = {'projectId': projectId}
+    doc = projects.find_one(query)
+    client.close()
+
+    return doc
+
+
+def createProject(projectName, projectId, description):
     client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
     
-    if not projects.find({'name': projectName, 'projectid': projectID}):
+    if projects.find_one({'projectId': projectId}) == None:
         doc = {
-            'name': projectName,
-            'projectid': projectID,
+            'projectName': projectName,
+            'projectId': projectId,
             'description': description,
-            'hwsets': {},
+            'hwSets': {},
             'users': []
         }
         projects.insert_one(doc)
@@ -32,20 +44,20 @@ def addProject(projectName, projectID, description):
         message = 'Successfully added project'
     else:
         success = False
-        message = 'Project name or ID already taken'
+        message = 'Project ID already taken'
 
     client.close()
 
     return success, message
 
 
-def queryProject(projectID):
+def addUser(projectId, userid):
     client = MongoClient(MONGODB_SERVER)
     db = client.HardwareCheckout
     projects = db.Projects
 
-    query = {'projectid': projectID}
-    doc = projects.find_one(query)
+    filter = {'projectId': userid}
+    newValue = {'$push': {'users': projectId}}
+    projects.update_one(filter, newValue)
+    
     client.close()
-
-    return doc

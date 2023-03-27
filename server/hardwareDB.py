@@ -5,7 +5,7 @@ MONGODB_SERVER = 'mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net
 '''
 Structure of Hardware Set entry so far:
 HardwareSet = {
-    'name': hwSetName,
+    'hwName': hwSetName,
     'capacity': initialCapacity,
     'availability': initialCapacity
 }
@@ -16,9 +16,9 @@ def addHardwareSet(hwSetName, initCapacity):
     db = client.HardwareCheckout
     hwsets = db.HardwareSets
     
-    if not hwsets.find({'name': hwSetName}):
+    if not hwsets.find({'hwName': hwSetName}):
         doc = {
-            'name': hwSetName,
+            'hwName': hwSetName,
             'capacity': str(initCapacity),
             'availability': str(initCapacity)
         }
@@ -40,7 +40,7 @@ def queryHardwareSet(hwSetName):
     db = client.HardwareCheckout
     hwsets = db.HardwareSets
 
-    query = {'name': hwSetName}
+    query = {'hwName': hwSetName}
     doc = hwsets.find_one(query)
     client.close()
 
@@ -51,7 +51,7 @@ def updateAvailability(hwSetName, newAvailability):
     db = client.HardwareCheckout
     hwsets = db.HardwareSets
 
-    filter = {'name': hwSetName}
+    filter = {'hwName': hwSetName}
     newValue = {'$set': {'availability': newAvailability}}
 
     hwsets.update_one(filter, newValue)
