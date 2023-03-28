@@ -13,8 +13,7 @@ User = {
 '''
 
 def addUser(client, username, userId, password):
-    db = client.HardwareCheckout
-    people = db.People
+    people = client.HardwareCheckout.People
 
     existing_user = people.find_one({'username': username, 'userId': userId})
     if existing_user == None:
@@ -36,8 +35,7 @@ def addUser(client, username, userId, password):
 
 
 def __queryUser(client, username, userId):
-    db = client.HardwareCheckout
-    people = db.People
+    people = client.HardwareCheckout.People
 
     query = {'username': username, 'userId': userId}
     doc = people.find_one(query)
@@ -57,8 +55,7 @@ def login(client, username, userId, password):
 
 
 def joinProject(client, userId, projectId):
-    db = client.HardwareCheckout
-    people = db.People
+    people = client.HardwareCheckout.People
 
     success = False;
     userProjects = people.find_one({'userId': userId})['projects']
@@ -79,8 +76,7 @@ def joinProject(client, userId, projectId):
 
 
 def getUserProjects(client, userId):
-    db = client.HardwareCheckout
-    people = db.People
+    people = client.HardwareCheckout.People
 
     userProjects = people.find_one({'userId': userId})['projects']
     projects = []

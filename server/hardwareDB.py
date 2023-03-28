@@ -1,20 +1,16 @@
 from pymongo import MongoClient
 
-MONGODB_SERVER = 'mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net/?retryWrites=true&w=majority'
-
 '''
 Structure of Hardware Set entry so far:
 HardwareSet = {
     'hwName': hwSetName,
-    'capacity': initialCapacity,
-    'availability': initialCapacity
+    'capacity': initCapacity,
+    'availability': initCapacity
 }
 '''
 
-def addHardwareSet(hwSetName, initCapacity):
-    client = MongoClient(MONGODB_SERVER)
-    db = client.HardwareCheckout
-    hwsets = db.HardwareSets
+def addHardwareSet(client, hwSetName, initCapacity):
+    hwsets = client.HardwareCheckout.HardwareSets
     
     if not hwsets.find({'hwName': hwSetName}):
         doc = {
@@ -30,46 +26,45 @@ def addHardwareSet(hwSetName, initCapacity):
         success = False
         message = 'Name already taken by another hardware set'
 
-    client.close()
 
     return success, message
 
-# Might have to be private
-def queryHardwareSet(hwSetName):
-    client = MongoClient(MONGODB_SERVER)
-    db = client.HardwareCheckout
-    hwsets = db.HardwareSets
+
+def queryHardwareSet(client, hwSetName):
+    hwsets = client.HardwareCheckout.HardwareSets
 
     query = {'hwName': hwSetName}
     doc = hwsets.find_one(query)
-    client.close()
 
     return doc
 
-def updateAvailability(hwSetName, newAvailability):
-    client = MongoClient(MONGODB_SERVER)
-    db = client.HardwareCheckout
-    hwsets = db.HardwareSets
+
+def updateAvailability(client, hwSetName, newAvailability):
+    hwsets = client.HardwareCheckout.HardwareSets
 
     filter = {'hwName': hwSetName}
     newValue = {'$set': {'availability': newAvailability}}
 
     hwsets.update_one(filter, newValue)
-    client.close()
 
-def checkOut(hwSetName):
-    return
 
-def checkIn(hwSetName):
-    return
-
-def requestSpace(hwSetName, amount):
+def requestSpace(client, hwSetName, amount):
     hwset = queryHardwareSet(hwSetName)
-    avail = int(hwset['Availability'])
-    allocated = min(avail, amount)
-    avail -= allocated
+    avail = int(hwset['availability'])
+    if amount > avail:
+        return False, 'Not enough space available'
+    
+    avail -= amount
+    updateAvailability(client, hwSetName, avail)
 
-    # Change database entry
-    updateAvailability(hwSetName, avail)
+    return True, 'Successfully requested space'
 
-    return allocated
+
+def checkOut(client, hwSetName):
+    return
+
+
+def checkIn(client, hwSetName, amount):
+    hwset = queryHardwareSet(hwSetName)
+    updateAvailability(client, hwSetName, int(hwset['availability']) + amount)
+    return True, 'Successfully checked out hardware'

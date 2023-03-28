@@ -12,8 +12,7 @@ Project = {
 '''
 
 def queryProject(client, projectId):
-    db = client.HardwareCheckout
-    projects = db.Projects
+    projects = client.HardwareCheckout.Projects
 
     query = {'projectId': projectId}
     doc = projects.find_one(query)
@@ -22,8 +21,7 @@ def queryProject(client, projectId):
 
 
 def createProject(client, projectName, projectId, description):
-    db = client.HardwareCheckout
-    projects = db.Projects
+    projects = client.HardwareCheckout.Projects
     
     if projects.find_one({'projectId': projectId}) == None:
         doc = {
@@ -44,10 +42,23 @@ def createProject(client, projectName, projectId, description):
     return success, message
 
 
-def addUser(client, projectId, userid):
-    db = client.HardwareCheckout
-    projects = db.Projects
+def addUser(client, projectId, userId):
+    projects = client.HardwareCheckout.Projects
 
-    filter = {'projectId': userid}
-    newValue = {'$push': {'users': projectId}}
+    filter = {'projectId': projectId}
+    newValue = {'$push': {'users': userId}}
     projects.update_one(filter, newValue)
+
+
+def checkOutHW(client, projectId, hwSetName):
+    projects = client.HardwareCheckout.Projects
+
+    projects.update_one({'projectId': projectId}, {'$push': {'hwSets.' + hwSetName: 0}})
+    return
+
+
+def checkOutHW(client, projectId, hwSetName):
+    projects = client.HardwareCheckout.Projects
+
+    projects.update_one({'projectId': projectId}, {'$pull': {'hwSets.' + hwSetName: 0}})
+    return
