@@ -10,17 +10,17 @@ export default function OurSignUpPage() {
     const [email, setEmail] = useState('');    
 
     const handleAddUser = () => {
-        axios.post('/add_user', {username: username, userId: userId, password: password})
-          .then(res => {
-            if (res.data.success) {
-              setLoggedIn(true);
-            } else {
-              alert(res.data.message);
-            }
-          })
-          .catch(err => {
-            console.log(err);
-          });
+        axios.get('/add_user', {username: username, userId: userId, password: password})
+            .then(res => {
+                if (res.data.success) {
+                    setLoggedIn(true);
+                } else {
+                    alert(res.data.message);
+                }
+            })
+            .catch(err => {
+                console.log(err);
+            });
       };
 
     return (
@@ -58,6 +58,7 @@ export default function OurSignUpPage() {
                 </footer>
             </div>
         )}
+        {loggedIn}  {/* Brings it to next page */}
     </div>
     );
 }
