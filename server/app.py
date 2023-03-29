@@ -10,11 +10,13 @@ MONGODB_SERVER = 'mongodb+srv://goblin:Password1234@database.kbcy6ct.mongodb.net
 
 app = Flask(__name__)
 
-
+# WORKING
 # Function tries to login a user with their provided username and Password
 # Returns json specfiying if the user login attempt was successful or not
 @app.route('/login', methods=['POST'])
 def login():
+    # user_id = request.args.get('userId', None)
+    # print(f"User Portal for user ID: {user_id}")
     username = request.json.get('username') # username, password are taken in from the webpage html
     userId = request.json.get('userId')
     password = request.json.get('password')
@@ -23,9 +25,52 @@ def login():
     success, message = usersDB.login(client, username, userId, password)
     client.close()
 
+    return jsonify({'success': success, 'message': message, 'userId': userId})
+
+# work in progress
+@app.route('/main')
+def mainPage():
+    user_id = request.args.get('userId', None)
+    print(f"/main User Portal for user ID: {user_id}")
+    # username = request.json.get('username') # username, password are taken in from the webpage html
+    # userId = request.json.get('userId')
+    # password = request.json.get('password')
+
+    client = MongoClient(MONGODB_SERVER)
+    projects = usersDB.getUserProjects(client)
+    client.close()
+
+    return jsonify({'success': success, 'userId': userId})
+
+@app.route('/join_project', methods=['GET'])
+def join_project():
+    project_id = request.args.get('projectId', None)
+    user_id = request.args.get('userId', None)
+    print(f"debug join project: {project_id} {user_id}")
+
+
+    client = MongoClient(MONGODB_SERVER)
+    db = client['HardwareCheckout']
+    project = db.Projects.find_one({"projectId": project_id})
+    # project = client.HardwareCheckout.Projects.find_one({"projectId":project_id})
+    # success, message = usersDB.joinProject(client, userId, projectId)
+    if project:
+            # client.HardwareCheckout.Projects.update_one({"projectId": ObjectId(project_id)}, {"$addToSet": {"users": user_id}})
+            result = db.Projects.update_one(
+                {'projectId': project_id},
+                {'$push': {'users': user_id}}
+            )
+            client.close()
+            return jsonify(success=True)
+    else:
+        client.close()
+        return jsonify(success=False, message="Project not found"), 404
+
     return jsonify({'success': success, 'message': message})
 
 
+
+# NOT SURE IF WORKING
 # Function tries to create a user with their provided username and Password
 # Returns json specfiying if the user creation was successful or not
 @app.route('/add_user', methods=['POST'])
@@ -70,17 +115,6 @@ def create_project():
 
     return jsonify({'success': success, 'message': message})
 
-
-@app.route('/join_project', methods=['GET'])
-def join_project():
-    userId = request.json.get('userId')
-    projectId = request.json.get('projectId')
-    
-    client = MongoClient(MONGODB_SERVER)
-    success, message = usersDB.joinProject(client, userId, projectId)
-    client.close()
-
-    return jsonify({'success': success, 'message': message})
 
 
 @app.route('/check_out', methods=['POST'])

@@ -5,12 +5,15 @@ import axios from 'axios'
 import Project from '../components/Project'
 
 export default function ProjectsPage() {
-    const [userId, setUserId] = useState('');
+    // const [userId, setUserId] = useState('');
     const [projectName, setProjectName] = useState('');
     const [projectId, setProjectId] = useState('');
     const [description, setDescription] = useState('');
 
+    // const location = useLocation();
     const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+    const userId = searchParams.get('userId') || 'No user ID';
 
     const [existingProjectId, setExistingProjectId] = useState('');
 
@@ -31,26 +34,28 @@ export default function ProjectsPage() {
     }
     
     
-    const handleJoinProject = () => {
-        axios.get('/join_project', {userId: userId, projectId: existingProjectId})
-            .then(res => {
-                if(res.data.success) {
-                    alert(res.data.message);
-                } else {
-                    alert(res.data.message);
-                }
-            })
-            .catch(err => {
-                console.log(err);
-            }
-        );
+ const handleJoinProject = async () => {
+    try {
+      const response = await fetch(
+        `/join_project?projectId=${existingProjectId}&userId=${userId}`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Successfully joined the project');
+      } else {
+        alert('Error joining the project: ' + data.message);
+      }
+    } catch (error) {
+      alert('Error joining the project: ' + error.message);
     }
+  };
 
 
     return (
         <div className="text-center m-5-auto">
             <h2>Welcome!</h2>
-            <p>User ID: </p>
+            <p>User ID: {userId}</p>
             {/* <form action="/projenter"> */}
                 <p>
                     <label>Create Project</label>
