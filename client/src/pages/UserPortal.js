@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useLocation, Link } from 'react-router-dom'
 import axios from 'axios'
 
 import Project from '../components/Project'
@@ -9,6 +9,8 @@ export default function ProjectsPage() {
     const [projectName, setProjectName] = useState('');
     const [projectId, setProjectId] = useState('');
     const [description, setDescription] = useState('');
+
+    const location = useLocation();
 
     const [existingProjectId, setExistingProjectId] = useState('');
 
@@ -30,7 +32,7 @@ export default function ProjectsPage() {
     
     
     const handleJoinProject = () => {
-        axios.post('/join_project', {userId: userId, projectId: existingProjectId})
+        axios.get('/join_project', {userId: userId, projectId: existingProjectId})
             .then(res => {
                 if(res.data.success) {
                     alert(res.data.message);
@@ -48,7 +50,8 @@ export default function ProjectsPage() {
     return (
         <div className="text-center m-5-auto">
             <h2>Welcome!</h2>
-            <form action="/projenter">
+            <p>User ID: </p>
+            {/* <form action="/projenter"> */}
                 <p>
                     <label>Create Project</label>
                     <input type="text" placeholder="Project Name" value={projectName} onChange={e => setProjectName(e.target.value)} />
@@ -69,7 +72,7 @@ export default function ProjectsPage() {
                 <div>
                     <Project />
                 </div>
-            </form>
+            {/* </form> */}
         </div>
     )
 }

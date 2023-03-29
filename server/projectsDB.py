@@ -1,5 +1,7 @@
 from pymongo import MongoClient
 
+import hardwareDB
+
 '''
 Structure of Project entry so far:
 Project = {
@@ -50,15 +52,35 @@ def addUser(client, projectId, userId):
     projects.update_one(filter, newValue)
 
 
+def updateUsage(client, projectId, hwSetName):
+    projects = client.HardwareCheckout.Projects
+
+
+
 def checkOutHW(client, projectId, hwSetName):
     projects = client.HardwareCheckout.Projects
 
-    projects.update_one({'projectId': projectId}, {'$push': {'hwSets.' + hwSetName: 0}})
-    return
+    projects.update_one(
+        {'projectId': projectId}, 
+        {'$push': 
+            {'hwSets': 
+                {hwSetName: 0}
+            }
+        }
+    )
 
 
 def checkOutHW(client, projectId, hwSetName):
     projects = client.HardwareCheckout.Projects
 
-    projects.update_one({'projectId': projectId}, {'$pull': {'hwSets.' + hwSetName: 0}})
-    return
+    used = projects.find_one({'projectId': projectId})['hwSets'][hwSetName]
+
+    hardwareDB.requestSpace(client, hwSetName, -used)
+    projects.update_one(
+        {'projectId': projectId}, 
+        {'$pull': 
+            {'hwSets': 
+                {hwSetName: used}
+            }
+        }
+    )

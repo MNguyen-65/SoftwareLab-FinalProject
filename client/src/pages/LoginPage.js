@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate, Navigate, Link } from 'react-router-dom'
 import axios from 'axios'
+import UserPortal from './UserPortal'
 
 export default function SignInPage() {
     const [loggedIn, setLoggedIn] = useState(false);
@@ -8,7 +9,9 @@ export default function SignInPage() {
     const [userId, setUserId] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleLogin = () => {
+    const handleLogin = (e) => {
+    e.preventDefault();
+
         axios.post('/login', {username: username, userId: userId, password: password})
             .then(res => {
                 if (res.data.success) {
@@ -21,6 +24,9 @@ export default function SignInPage() {
                 console.log(err);
             });
     };
+    if (loggedIn) {
+        return <Navigate to={`/main?userId=${userId}`} replace/>;
+    }
 
     return (
         <div>
@@ -52,7 +58,12 @@ export default function SignInPage() {
                 </footer>
             </div>
             )}
-            {loggedIn}  {/* Brings it to next page */}
+            {loggedIn &&(
+            <div>
+                <h2>Hard-coding the below in LoginPage.js but it should be through app</h2>
+                <UserPortal />
+            </div>
+            )}
         </div>
     );
 }

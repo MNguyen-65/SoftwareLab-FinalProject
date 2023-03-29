@@ -71,7 +71,7 @@ def create_project():
     return jsonify({'success': success, 'message': message})
 
 
-@app.route('/join_project', methods=['POST'])
+@app.route('/join_project', methods=['GET'])
 def join_project():
     userId = request.json.get('userId')
     projectId = request.json.get('projectId')
@@ -83,23 +83,40 @@ def join_project():
     return jsonify({'success': success, 'message': message})
 
 
-@app.route('/add_hardware', methods=['POST'])
-def add_hardware_set():
+@app.route('/check_out', methods=['POST'])
+def check_out():
+    projectId = request.json.get('projectId')
+    hwSetName = request.json.get('hwSetName')
+
+    client = MongoClient(MONGODB_SERVER)
+    projectsDB.checkOutHW(client, projectId, hwSetName)
+    client.close()
+
+    return jsonify({'success': True, 'message': 'Checked in ' + hwSetName})
+
+
+@app.route('/check_in', methods=['POST'])
+def check_in():
+    projectId = request.json.get('projectId')
+    hwSetName = request.json.get('hwSetName')
+
+    client = MongoClient(MONGODB_SERVER)
+    projectsDB.checkInHW(client, projectId, hwSetName)
+    client.close()
+
+    return jsonify({'success': True, 'message': 'Checked out ' + hwSetName})
+
+
+@app.route('/create_hardware_set', methods=['POST'])
+def create_hardware_set():
     hwSetName = request.json.get('name')
     initCapacity = request.json.get('initCapacity')
 
     client = MongoClient(MONGODB_SERVER)
+    success, message = hardwareDB.createHardwareSet(client, hwSetName, initCapacity)
+    client.close()
 
-    db = client.HardwareCheckout
-    hwsets = db.HardwareSets
-    
-    doc = {
-        'name': hwSetName,
-        'capacity': str(initCapacity),
-        'availability': str(initCapacity)
-    }
-
-    hwsets.insert_one(doc)
+    return jsonify({'success': success, 'message': message})
 
 
 @app.route('/api/inventory', methods=['GET'])

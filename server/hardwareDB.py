@@ -9,7 +9,7 @@ HardwareSet = {
 }
 '''
 
-def addHardwareSet(client, hwSetName, initCapacity):
+def createHardwareSet(client, hwSetName, initCapacity):
     hwsets = client.HardwareCheckout.HardwareSets
     
     if not hwsets.find({'hwName': hwSetName}):
@@ -58,13 +58,3 @@ def requestSpace(client, hwSetName, amount):
     updateAvailability(client, hwSetName, avail)
 
     return True, 'Successfully requested space'
-
-
-def checkOut(client, hwSetName):
-    return
-
-
-def checkIn(client, hwSetName, amount):
-    hwset = queryHardwareSet(hwSetName)
-    updateAvailability(client, hwSetName, int(hwset['availability']) + amount)
-    return True, 'Successfully checked out hardware'

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate, Navigate, Link } from 'react-router-dom'
 import axios from 'axios';
 
 export default function OurSignUpPage() {
@@ -9,7 +9,11 @@ export default function OurSignUpPage() {
     const [password, setPassword] = useState('');    
     const [email, setEmail] = useState('');    
 
-    const handleAddUser = () => {
+    
+
+    const handleAddUser = (e) => {
+        e.preventDefault();
+
         axios.get('/add_user', {username: username, userId: userId, password: password})
             .then(res => {
                 if (res.data.success) {
@@ -22,6 +26,10 @@ export default function OurSignUpPage() {
                 console.log(err);
             });
       };
+
+      if (loggedIn) {
+        return <Navigate to={`/main?userId=${userId}`} replace/>;
+    }
 
     return (
         <div>
