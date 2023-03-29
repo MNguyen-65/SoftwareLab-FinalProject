@@ -20,11 +20,10 @@ class Project extends React.Component {
                 </ul>
                 Hardware Sets:
                 <ul>
-                  <div>Name: "" Qty: -/-                 
-                      <Checkout />   
-                  </div>
                 </ul>
-            </div>    
+                CheckIn/CheckOut Hardware:
+                      <Checkout />   
+\            </div>    
         </div>
       );
     }

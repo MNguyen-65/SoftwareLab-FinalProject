@@ -55,13 +55,15 @@ def join_project():
     # project = client.HardwareCheckout.Projects.find_one({"projectId":project_id})
     # success, message = usersDB.joinProject(client, userId, projectId)
     if project:
+        if user_id in project['users']:
+            return jsonify({'success': False, 'message': 'User is already in this project'})
             # client.HardwareCheckout.Projects.update_one({"projectId": ObjectId(project_id)}, {"$addToSet": {"users": user_id}})
-            result = db.Projects.update_one(
-                {'projectId': project_id},
-                {'$push': {'users': user_id}}
-            )
-            client.close()
-            return jsonify(success=True)
+        result = db.Projects.update_one(
+            {'projectId': project_id},
+            {'$push': {'users': user_id}}
+        )
+        client.close()
+        return jsonify(success=True)
     else:
         client.close()
         return jsonify(success=False, message="Project not found"), 404

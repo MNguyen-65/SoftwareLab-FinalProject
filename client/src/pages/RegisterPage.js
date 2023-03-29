@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Navigate, Link } from 'react-router-dom'
 import axios from 'axios';
+import UserPortal from './UserPortal'
 
 export default function OurSignUpPage() {
     const [loggedIn, setLoggedIn] = useState(false);
@@ -14,7 +15,7 @@ export default function OurSignUpPage() {
     const handleAddUser = (e) => {
         e.preventDefault();
 
-        axios.get('/add_user', {username: username, userId: userId, password: password})
+        axios.post('/add_user', {username: username, userId: userId, password: password})
             .then(res => {
                 if (res.data.success) {
                     setLoggedIn(true);
@@ -27,7 +28,7 @@ export default function OurSignUpPage() {
             });
       };
 
-      if (loggedIn) {
+    if (loggedIn) {
         return <Navigate to={`/main?userId=${userId}`} replace/>;
     }
 
@@ -37,7 +38,7 @@ export default function OurSignUpPage() {
             <div className="text-center m-5-auto">
                 <h2>Join us!</h2>
                 <h5>Create your own personal account</h5>
-                <form action="/home">
+                <form action="/main"> 
                     <p>
                         <label>Username</label><br/>
                         <input type="text" name="first_name" value = {username} onChange = {e => setUsername(e.target.value)}  required />
@@ -46,17 +47,17 @@ export default function OurSignUpPage() {
                         <label>UserId</label><br/>
                         <input type="text" name="user_id"  value = {userId} onChange = {e => setUserID(e.target.value)}required />
                     </p>
-                    <p>
+                    {/* <p>
                         <label>Email address</label><br/>
                         <input type="email" name="email" value = {email} onChange = {e => setEmail(e.target.value)} required />
-                    </p>
+                    </p> */}
                     <p>
                         <label>Password</label><br/>
                         <input type="password" name="password" value = {password} onChange = {e => setPassword(e.target.value)}requiredc />
                     </p>
-                    <p>
+                    {/* <p>
                         <input type="checkbox" name="checkbox" id="checkbox" required /> <span>I agree all statements in <a href="https://google.com" target="_blank" rel="noopener noreferrer">terms of service</a></span>.
-                    </p>
+                    </p> */}
                     <p>
                         <button id="sub_btn" onClick={handleAddUser}>Register</button>
                     </p>
@@ -66,7 +67,12 @@ export default function OurSignUpPage() {
                 </footer>
             </div>
         )}
-        {loggedIn}  {/* Brings it to next page */}
+        {loggedIn &&(
+            <div>
+                <h2>Hard-coding the below in LoginPage.js but it should be through app</h2>
+                <UserPortal />
+            </div>
+            )}
     </div>
     );
 }

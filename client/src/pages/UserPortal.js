@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation, Navigate, Link } from 'react-router-dom'
 import axios from 'axios'
 
 import Project from '../components/Project'
@@ -9,6 +9,7 @@ export default function ProjectsPage() {
     const [projectName, setProjectName] = useState('');
     const [projectId, setProjectId] = useState('');
     const [description, setDescription] = useState('');
+    const [loggedOut, setLoggedOut] = useState(false);
 
     // const location = useLocation();
     const location = useLocation();
@@ -51,9 +52,17 @@ export default function ProjectsPage() {
     }
   };
 
+    const handleLogout = () => {
+        setLoggedOut(true);
+    }
+
+    if (loggedOut) {
+        return <Navigate to={'/'} replace/>;
+    }
 
     return (
         <div className="text-center m-5-auto">
+            <button onClick={handleLogout}> Log off</button>
             <h2>Welcome!</h2>
             <p>User ID: {userId}</p>
             {/* <form action="/projenter"> */}

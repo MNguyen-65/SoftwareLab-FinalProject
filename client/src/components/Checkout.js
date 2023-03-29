@@ -4,7 +4,8 @@ class Checkout extends React.Component {
     constructor(props) {
       super(props);
       this.state = {
-        amount: ''
+        amount: '',
+        name: ''
       };
       this.handleSubmit = this.handleSubmit.bind(this);
       this.handleChange = this.handleChange.bind(this);
@@ -23,6 +24,10 @@ class Checkout extends React.Component {
       return (
         <form onSubmit={this.handleSubmit}>
           <label>
+          Name of Hardware Set:
+             <div>
+              <input type="text" name={this.state.name} onChange={this.handleChange} />
+             </div>
              Enter Quantity of Hardware:
              <div>
               <input type="text" amount={this.state.amount} onChange={this.handleChange} />
