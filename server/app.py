@@ -88,12 +88,23 @@ def add_user():
     return jsonify({'success': success, 'message': message})
 
 
+@app.route('/get_user_projects_list', methods=['GET'])
+def get_user_projects():
+    userId = request.json.get('userId')
+
+    client = MongoClient(MONGODB_SERVER)
+    projects = usersDB.getUserProjectsList(client, userId)
+    client.close()
+
+    return jsonify(projects)
+
+
 @app.route('/get_user_projects', methods=['GET'])
 def get_user_projects():
     userId = request.json.get('userId')
 
     client = MongoClient(MONGODB_SERVER)
-    projects = usersDB.getUserProjects(client)
+    projects = usersDB.getUserProjects(client, userId)
     client.close()
 
     return jsonify(projects)

@@ -75,6 +75,14 @@ def joinProject(client, userId, projectId):
     return success, message
 
 
+def getUserProjectsList(client, userId):
+    people = client.HardwareCheckout.People
+
+    userProjects = people.find_one({'userId': userId})['projects']
+
+    return userProjects
+
+
 def getUserProjects(client, userId):
     people = client.HardwareCheckout.People
 

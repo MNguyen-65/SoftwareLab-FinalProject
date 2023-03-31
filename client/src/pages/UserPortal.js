@@ -1,20 +1,20 @@
 import React, { useState } from 'react'
 import { useLocation, Navigate, Link } from 'react-router-dom'
+import Select from '@mui/material/Select'
 import axios from 'axios'
 
 import Project from '../components/Project'
 
 export default function ProjectsPage() {
-    // const [userId, setUserId] = useState('');
     const [projectName, setProjectName] = useState('');
     const [projectId, setProjectId] = useState('');
     const [description, setDescription] = useState('');
     const [loggedOut, setLoggedOut] = useState(false);
 
-    // const location = useLocation();
     const location = useLocation();
     const searchParams = new URLSearchParams(location.search);
     const userId = searchParams.get('userId') || 'No user ID';
+    const userProjectsList = [];
 
     const [existingProjectId, setExistingProjectId] = useState('');
 
@@ -63,11 +63,11 @@ export default function ProjectsPage() {
     return (
         <div className="text-center m-5-auto">
             <button onClick={handleLogout}> Log off</button>
-            <h2>Welcome!</h2>
+            <h1>Welcome!</h1>
             <p>User ID: {userId}</p>
             {/* <form action="/projenter"> */}
                 <p>
-                    <label>Create Project</label>
+                    <h2>Create Project</h2>
                     <input type="text" placeholder="Project Name" value={projectName} onChange={e => setProjectName(e.target.value)} />
                     <br />
                     <input type="text" placeholder="Project ID" value={projectId} onChange={e => setProjectId(e.target.value)} />
@@ -77,7 +77,7 @@ export default function ProjectsPage() {
                     <button onClick={handleCreateProject}>Create Project</button>
                 </p>
                 <p>
-                    <label>Join Project</label>
+                    <h2>Join Project</h2>
                     <input type="text" placeholder="Project ID" value={existingProjectId} onChange={e => setExistingProjectId(e.target.value)} />
                     <br />
                     <button onClick={handleJoinProject}>Join Project</button>
