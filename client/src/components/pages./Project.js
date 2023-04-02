@@ -1,33 +1,68 @@
 import React from "react";
 import Checkout from "./Checkout";
 import './UserPortal.css'
+import axios from "axios";
+import { useState } from "react";
 
-class Project extends React.Component {
-    constructor(props) {
-      super(props);
-      this.state = {
-        id: ''
-      };
-    }
+export default function Project() {
+  const [projectName, setProjectName] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const [description, setDescription] = useState('');
+  const [userId, setUserId] = useState('');
 
-    render() {
-      return (
-        <div className="Project">
-            <h3>Project: {this.state.id}</h3>
-            <div>
-                Users in this Project:
-                <ul>
-                </ul>
-                Hardware Sets:
-                <ul>
-                  <div>Name: "" Qty: -/-                 
-                      <Checkout />   
-                  </div>
-                </ul>
-            </div>    
-        </div>
+  const [loggedOut, setLoggedOut] = useState(false);
+  const users = []
+  const sets = "";
+
+
+    const handleUsers = () => {
+      axios.post('/get_user_projects', {userId: userId})
+          .then(res => {
+              if(res.data.success) {
+                  alert(res.data.message);
+              } else {
+                  alert(res.data.message);
+              }
+          })
+          .catch(err => {
+              console.log(err);
+          }
       );
-    }
-   }
+  }
 
-   export default Project;
+  const handleHWsets = () => {
+    axios.post('/create_project', {userId: userId, projectName: projectName, projectId: projectId, description: description})
+        .then(res => {
+            if(res.data.success) {
+                alert(res.data.message);
+            } else {
+                alert(res.data.message);
+            }
+        })
+        .catch(err => {
+            console.log(err);
+        }
+    );
+}
+
+
+
+
+    return (
+   
+      <div className="Project">
+          <h3>Project: </h3>
+          <div>
+              Users in this Project:
+              <ul>
+              </ul>
+              Hardware Sets:
+              <ul>
+              </ul>
+              CheckIn/CheckOut Hardware:
+                    <Checkout />
+          </div>    
+      </div>
+    );
+       
+}

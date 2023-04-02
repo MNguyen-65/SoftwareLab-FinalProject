@@ -1,16 +1,15 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 
-import '../../App.css'
 
 export default function ForgetPasswordPage() {
     return (
-        <div className="text-center m-5-auto">
-            <h2>Reset your password</h2>
-            <h5>Enter your email address and we will send you a new password</h5>
+        <div className="text-center m-5-auto" id='forgotlanding'  style={{textAlign: "center", color: 'red'}}>
+            <h2 id='reset' style={{textAlign: "center", color: 'green'}}>Reset your password</h2>
+            <h5 id='reset' style={{textAlign: "center", color: 'green'}}>Enter your email address and we will send you a new password</h5>
             <form action="/login">
                 <p>
-                    <label id="reset_pass_lbl">Email address</label><br/>
+                    <label id="reset_pass_lbl" >Email address</label><br/>
                     <input type="email" name="email" required />
                 </p>
                 <p>
@@ -18,8 +17,8 @@ export default function ForgetPasswordPage() {
                 </p>
             </form>
             <footer>
-                <p>First time? <Link to="/register">Create an account</Link>.</p>
-                <p><Link to="/">Back to Homepage</Link>.</p>
+                <p style={{textAlign: "center", color: 'orange'}}>First time? <Link to="/register" style={{textAlign: "center", color: 'orange'}}>Create an account</Link>.</p>
+                <p style={{textAlign: "center", color: 'orange'}}><Link to="/" style={{textAlign: "center", color: 'orange'}}>Back to Homepage</Link>.</p>
             </footer>
         </div>
     )
