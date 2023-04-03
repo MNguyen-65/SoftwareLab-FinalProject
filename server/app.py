@@ -42,31 +42,14 @@ def mainPage():
 
     return jsonify({'success': success, 'userId': userId})
 
-@app.route('/join_project', methods=['GET'])
+@app.route('/join_project', methods=['POST'])
 def join_project():
-    project_id = request.args.get('projectId', None)
-    user_id = request.args.get('userId', None)
-    print(f"debug join project: {project_id} {user_id}")
-
+    projectId = request.json.get('projectId')
+    userId = request.json.get('userId')
 
     client = MongoClient(MONGODB_SERVER)
-    db = client['HardwareCheckout']
-    project = db.Projects.find_one({"projectId": project_id})
-    # project = client.HardwareCheckout.Projects.find_one({"projectId":project_id})
-    # success, message = usersDB.joinProject(client, userId, projectId)
-    if project:
-        if user_id in project['users']:
-            return jsonify({'success': False, 'message': 'User is already in this project'})
-            # client.HardwareCheckout.Projects.update_one({"projectId": ObjectId(project_id)}, {"$addToSet": {"users": user_id}})
-        result = db.Projects.update_one(
-            {'projectId': project_id},
-            {'$push': {'users': user_id}}
-        )
-        client.close()
-        return jsonify(success=True)
-    else:
-        client.close()
-        return jsonify(success=False, message="Project not found"), 404
+    success, message = usersDB.joinProject(client, userId, projectId)
+    client.close()
 
     return jsonify({'success': success, 'message': message})
 
@@ -88,26 +71,15 @@ def add_user():
     return jsonify({'success': success, 'message': message})
 
 
-@app.route('/get_user_projects_list', methods=['GET'])
-def get_user_projects():
+@app.route('/get_user_projects_list', methods=['POST'])
+def get_user_projects_list():
     userId = request.json.get('userId')
 
     client = MongoClient(MONGODB_SERVER)
     projects = usersDB.getUserProjectsList(client, userId)
     client.close()
 
-    return jsonify(projects)
-
-
-@app.route('/get_user_projects', methods=['GET'])
-def get_user_projects():
-    userId = request.json.get('userId')
-
-    client = MongoClient(MONGODB_SERVER)
-    projects = usersDB.getUserProjects(client, userId)
-    client.close()
-
-    return jsonify(projects)
+    return jsonify({'projects': projects})
 
 
 @app.route('/create_project', methods=['POST'])
@@ -129,29 +101,86 @@ def create_project():
     return jsonify({'success': success, 'message': message})
 
 
+@app.route('/get_project_info', methods=['POST'])
+def get_project_info():
+    projectId = request.json.get('projectId')
+
+    client = MongoClient(MONGODB_SERVER)
+    project = projectsDB.queryProject(client, projectId)
+    projectName = project['projectName']
+    description = project['description']
+    hwSets = str(project['hwSets'])
+    users = project['users']
+    client.close()
+
+    return jsonify({'projectName': projectName, 
+                    'description': description, 
+                    'hwSets': hwSets, 
+                    'users': users})
+
+
+@app.route('/get_all_hw_names', methods=['POST'])
+def get_all_hw_names():
+    client = MongoClient(MONGODB_SERVER)
+    hwNames = hardwareDB.getAllHwNames(client)
+    client.close()
+
+    return jsonify({'hwNames': hwNames})
+
+
+@app.route('/get_hw_info', methods=['POST'])
+def get_hw_info():
+    hwName = request.json.get('hwName')
+
+    client = MongoClient(MONGODB_SERVER)
+    hwSet = hardwareDB.queryHardwareSet(client, hwName)
+    avail = hwSet['availability']
+    cap = hwSet['capacity']
+    client.close()
+
+    return jsonify({'availability': avail, 'capacity': cap})
+
 
 @app.route('/check_out', methods=['POST'])
 def check_out():
     projectId = request.json.get('projectId')
     hwSetName = request.json.get('hwSetName')
+    qty = request.json.get('qty')
+    userId = request.json.get('userId')
 
     client = MongoClient(MONGODB_SERVER)
-    projectsDB.checkOutHW(client, projectId, hwSetName)
+    success, message = projectsDB.checkOutHW(client, projectId, hwSetName, qty, userId)
+    if hardwareDB.queryHardwareSet(client, hwSetName) == None:
+        avail = 0
+        cap = 0
+    else:
+        hwset = hardwareDB.queryHardwareSet(client, hwSetName)
+        avail = hwset['availability']
+        cap = hwset['capacity']
     client.close()
 
-    return jsonify({'success': True, 'message': 'Checked in ' + hwSetName})
+    return jsonify({'success': success, 'message': message, 'avail': avail, 'cap': cap})
 
 
 @app.route('/check_in', methods=['POST'])
 def check_in():
     projectId = request.json.get('projectId')
     hwSetName = request.json.get('hwSetName')
+    qty = request.json.get('qty')
+    userId = request.json.get('userId')
 
     client = MongoClient(MONGODB_SERVER)
-    projectsDB.checkInHW(client, projectId, hwSetName)
+    success, message = projectsDB.checkInHW(client, projectId, hwSetName, qty, userId)
+    if hardwareDB.queryHardwareSet(client, hwSetName) == None:
+        avail = 0
+        cap = 0
+    else:
+        hwset = hardwareDB.queryHardwareSet(client, hwSetName)
+        avail = hwset['availability']
+        cap = hwset['capacity']
     client.close()
 
-    return jsonify({'success': True, 'message': 'Checked out ' + hwSetName})
+    return jsonify({'success': success, 'message': message, 'avail': avail, 'cap': cap})
 
 
 @app.route('/create_hardware_set', methods=['POST'])

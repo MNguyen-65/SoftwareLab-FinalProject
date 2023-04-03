@@ -81,15 +81,3 @@ def getUserProjectsList(client, userId):
     userProjects = people.find_one({'userId': userId})['projects']
 
     return userProjects
-
-
-def getUserProjects(client, userId):
-    people = client.HardwareCheckout.People
-
-    userProjects = people.find_one({'userId': userId})['projects']
-    projects = []
-
-    for projectId in userProjects:
-        projects.append(projectsDB.queryProject(client, projectId))
-
-    return projects

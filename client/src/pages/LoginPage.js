@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate, Navigate, Link } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 import axios from 'axios'
 import UserPortal from './UserPortal'
 

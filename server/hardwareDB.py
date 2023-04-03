@@ -49,12 +49,24 @@ def updateAvailability(client, hwSetName, newAvailability):
 
 
 def requestSpace(client, hwSetName, amount):
-    hwset = queryHardwareSet(hwSetName)
+    hwset = queryHardwareSet(client, hwSetName)
+    if hwset == None:
+        return False, 'Hardware set does not exist'
     avail = int(hwset['availability'])
     if amount > avail:
-        return False, 'Not enough space available'
+        return False, 'Not enough hardware available'
     
     avail -= amount
     updateAvailability(client, hwSetName, avail)
 
-    return True, 'Successfully requested space'
+    return True, 'Successfully requested ' + str(amount) + ' hardware.\n' + str(hwSetName) + ': ' + str(avail) + '/' + str(hwset['capacity'])
+
+
+def getAllHwNames(client):
+    hwsets = client.HardwareCheckout.HardwareSets
+    hwlist = list(hwsets.find({}))
+    hwNames = []
+    for hw in hwlist:
+        hwNames.append(hw['hwName'])
+
+    return hwNames

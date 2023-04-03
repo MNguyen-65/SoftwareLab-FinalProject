@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate, Navigate, Link } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 import axios from 'axios';
 import UserPortal from './UserPortal'
 
@@ -8,9 +8,6 @@ export default function OurSignUpPage() {
     const [username, setUsername] = useState('');
     const [userId, setUserID] = useState('');
     const [password, setPassword] = useState('');    
-    const [email, setEmail] = useState('');    
-
-    
 
     const handleAddUser = (e) => {
         e.preventDefault();

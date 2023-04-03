@@ -30,7 +30,7 @@ def createProject(client, projectName, projectId, description):
             'projectName': projectName,
             'projectId': projectId,
             'description': description,
-            'hwSets': {},
+            'hwSets': [],
             'users': []
         }
         projects.insert_one(doc)
@@ -56,31 +56,51 @@ def updateUsage(client, projectId, hwSetName):
     projects = client.HardwareCheckout.Projects
 
 
-
-def checkOutHW(client, projectId, hwSetName):
+def checkOutHW(client, projectId, hwSetName, qty, userId):
     projects = client.HardwareCheckout.Projects
+    user = client.HardwareCheckout.People
 
-    projects.update_one(
-        {'projectId': projectId}, 
-        {'$push': 
-            {'hwSets': 
-                {hwSetName: 0}
-            }
-        }
-    )
+    project = projects.find_one({'projectId': projectId})
+    if project == None:
+        return False, "Invalid project ID."
+    elif userId not in project['users']:
+        return False, "You are not a member of this project."
+    elif hardwareDB.queryHardwareSet(client, hwSetName) == None:
+        return False, "Hardware set does not exist."
+
+    names = []
+    for x in project['hwSets']:
+        names.append(x.keys())
+    
+    if hwSetName not in names:
+        projects.update_one({'projectId': projectId}, {'$push': {'hwSets': {hwSetName: int(qty)}}})
+    else:
+        usage = project['hwSets'][hwSetName]
+        projects.update_one({'projectId': projectId}, {'$set': {'hwSets': {hwSetName: int(usage) + int(qty)}}})
+
+    return hardwareDB.requestSpace(client, hwSetName, int(qty))
 
 
-def checkOutHW(client, projectId, hwSetName):
+def checkInHW(client, projectId, hwSetName, qty, userId):
     projects = client.HardwareCheckout.Projects
+    user = client.HardwareCheckout.People
 
-    used = projects.find_one({'projectId': projectId})['hwSets'][hwSetName]
+    project = projects.find_one({'projectId': projectId})
+    if project == None:
+        return False, "Invalid project ID."
+    elif userId not in project['users']:
+        return False, "You are not a member of this project."
+    elif hardwareDB.queryHardwareSet(client, hwSetName) == None:
+        return False, "Hardware set does not exist."
 
-    hardwareDB.requestSpace(client, hwSetName, -used)
-    projects.update_one(
-        {'projectId': projectId}, 
-        {'$pull': 
-            {'hwSets': 
-                {hwSetName: used}
-            }
-        }
-    )
+    names = []
+    for x in project['hwSets']:
+        names.append(x.keys())
+    
+    if hwSetName not in names:
+        projects.update_one({'projectId': projectId}, {'$push': {'hwSets': {hwSetName: -int(qty)}}})
+    else:
+        usage = project['hwSets'][hwSetName]
+        projects.update_one({'projectId': projectId}, {'$set': {'hwSets': {hwSetName: int(usage) - int(qty)}}})
+
+    return hardwareDB.requestSpace(client, hwSetName, -int(qty))
