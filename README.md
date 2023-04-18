@@ -6,12 +6,16 @@
 3. OOP
 4. Version control management
 
-Future opportunities:
+# Future opportunities:
 1. Revise away from shotgun surgery properties
 2. Save mongoDB clients to speed up database queries (90-95% speedup)
 3. Have checker function to prevent negative tool balances
 4. Improve UI
 5. Refactor code for future maintainability
+
+# Checkpoint 3 criteria:
+![image](https://user-images.githubusercontent.com/57050013/232920503-af18e5eb-b204-4740-a632-adf10919b976.png)
+
 
 ## HOW TO RUN
 1. Clone repository into a folder
